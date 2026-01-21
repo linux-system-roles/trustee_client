@@ -1,11 +1,10 @@
-# Role Name
+# cvm_deploy
 
-[![ansible-lint.yml](https://github.com/linux-system-roles/template/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/template/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/ansible-test.yml) [![codespell.yml](https://github.com/linux-system-roles/template/actions/workflows/codespell.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/codespell.yml) [![markdownlint.yml](https://github.com/linux-system-roles/template/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/markdownlint.yml) [![qemu-kvm-integration-tests.yml](https://github.com/linux-system-roles/template/actions/workflows/qemu-kvm-integration-tests.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/qemu-kvm-integration-tests.yml) [![shellcheck.yml](https://github.com/linux-system-roles/template/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/shellcheck.yml) [![tft.yml](https://github.com/linux-system-roles/template/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/template/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/template/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/template/actions/workflows/woke.yml)
+[![ansible-lint.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-test.yml) [![codespell.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/codespell.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/codespell.yml) [![markdownlint.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/markdownlint.yml) [![qemu-kvm-integration-tests.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/qemu-kvm-integration-tests.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/qemu-kvm-integration-tests.yml) [![shellcheck.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/shellcheck.yml) [![tft.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/woke.yml)
 
-![template](https://github.com/linux-system-roles/template/workflows/tox/badge.svg)
+![cvm_deploy](https://github.com/linux-system-roles/cvm_deploy/workflows/tox/badge.svg)
 
-A template for an ansible role that configures some GNU/Linux subsystem or
-service. A brief description of the role goes here.
+Ansible role for managing confidential computing machine deployments.
 
 ## Requirements
 
@@ -34,12 +33,12 @@ A description of all input variables (i.e. variables that are defined in
 `defaults/main.yml`) for the role should go here as these form an API of the
 role.  Each variable should have its own section e.g.
 
-### template_foo
+### cvm_deploy_config1
 
 This variable is required.  It is a string that lists the foo of the role.
 There is no default value.
 
-### template_bar
+### cvm_deploy_config2
 
 This variable is optional.  It is a boolean that tells the role to disable bar.
 The default value is `true`.
@@ -53,8 +52,8 @@ the lifetime.
 Example of setting the variables:
 
 ```yaml
-template_foo: "oof"
-template_bar: false
+cvm_deploy_config1: "oof"
+cvm_deploy_config2: false
 ```
 
 ## Variables Exported by the Role
@@ -68,7 +67,7 @@ convenient time.
 
 Example:
 
-### template_reboot_needed
+### cvm_deploy_reboot_needed
 
 Default `false` - if `true`, this means a reboot is needed to apply the changes
 made by the role
@@ -79,13 +78,13 @@ Including an example of how to use your role (for instance, with variables
 passed in as parameters) is always nice for users too:
 
 ```yaml
-- name: Manage the template subsystem
+- name: Manage cvm
   hosts: all
   vars:
-    template_foo: "foo foo!"
-    template_bar: false
+    cvm_deploy_config1: "foo foo!"
+    cvm_deploy_config2: false
   roles:
-    - linux-system-roles.template
+    - linux-system-roles.cvm_deploy
 ```
 
 More examples can be provided in the [`examples/`](examples) directory. These

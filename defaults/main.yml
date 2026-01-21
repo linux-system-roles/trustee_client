@@ -4,5 +4,5 @@
 # This file also serves as a documentation for such a variables.
 
 # Examples of role input variables:
-template_foo: foo
-template_bar: true
+cvm_deploy_config1: foo
+cvm_deploy_config2: true

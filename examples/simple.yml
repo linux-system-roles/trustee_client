@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 ---
-- name: Example template role invocation
+- name: Example cvm_deploy role invocation
   hosts: all
   vars:
-    template_foo: example variable value
-    template_bar: false
+    cvm_deploy_config1: example variable value
+    cvm_deploy_config2: false
   roles:
-    - linux-system-roles.template
+    - linux-system-roles.cvm_deploy

@@ -6,9 +6,9 @@
 # Examples of some tasks:
 - name: Ensure required packages are installed
   package:
-    name: "{{ __template_packages }}"
+    name: "{{ __cvm_deploy_packages }}"
     state: present
-    use: "{{ (__template_is_ostree | d(false)) |
+    use: "{{ (__cvm_deploy_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
 - name: Ensure required services are enabled and started
@@ -16,12 +16,12 @@
     name: "{{ item }}"
     state: started
     enabled: true
-  loop: "{{ __template_services }}"
+  loop: "{{ __cvm_deploy_services }}"
 
-- name: Generate /etc/{{ __template_foo_config }}
+- name: Generate /etc/{{ __cvm_deploy_foo_config }}
   template:
-    src: "{{ __template_foo_config }}.j2"
-    dest: /etc/{{ __template_foo_config }}
+    src: "{{ __cvm_deploy_foo_config }}.j2"
+    dest: /etc/{{ __cvm_deploy_foo_config }}
     backup: true
     mode: "0400"
-  notify: Handler for template to restart services
+  notify: Handler for cvm_deploy to restart services
