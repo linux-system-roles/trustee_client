@@ -6,35 +6,6 @@
     use: "{{ (__trustee_attestation_client_is_ostree | d(false)) |
           ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
-- name: Disable SELinux
-  block:
-    - name: Get current SELinux mode
-      ansible.builtin.command: getenforce
-      register: __selinux_mode
-      changed_when: false
-      failed_when: false
-
-    - name: Set SELinux to permissive mode
-      ansible.builtin.command: setenforce 0
-      when:
-        - __selinux_mode is succeeded
-        - __selinux_mode.stdout is defined
-        - __selinux_mode.stdout not in ['Permissive', 'disabled']
-      changed_when: true
-      failed_when: false
-
-    - name: Stat SELinux config file
-      ansible.builtin.stat:
-        path: /etc/selinux/config
-      register: __selinux_config
-
-    - name: Disable SELinux permanently
-      ansible.builtin.replace:
-        path: /etc/selinux/config
-        regexp: '^SELINUX=.*'
-        replace: 'SELINUX=disabled'
-      when: __selinux_config.stat.exists
-
 - name: Ensure quadlet install directory exists
   ansible.builtin.file:
     path: "{{ trustee_attestation_client_quadlet_install_dir }}"
@@ -129,23 +100,6 @@
     regexp: '^#AddDevice=/dev/sev-guest'
     replace: 'AddDevice=/dev/sev-guest'
   when: __sev_guest_device.stat.exists
-
-- name: Create podman storage directory on encrypted disk
-  ansible.builtin.file:
-    path: "{{ trustee_attestation_client_encrypt_disk_mount_point }}/containers-storage"
-    state: directory
-    mode: '0755'
-  when: trustee_attestation_client_encrypt_disk | bool
-
-- name: Configure podman to use encrypted disk for storage
-  ansible.builtin.copy:
-    content: |
-      [storage]
-      driver = "overlay"
-      graphroot = "{{ trustee_attestation_client_encrypt_disk_mount_point }}/containers-storage"
-    dest: /etc/containers/storage.conf
-    mode: '0644'
-  when: trustee_attestation_client_encrypt_disk | bool
 
 - name: Reload systemd daemon
   ansible.builtin.systemd:
