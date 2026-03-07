@@ -75,19 +75,19 @@
   loop:
     - path: /etc/trustee-gc/cdh/config.toml
       regexp: KBS_URL
-      replace: "{{ trustee_attestation_client_trustee_kbs_url }}"
+      replace: "{{ trustee_attestation_client_kbs_url }}"
     - path: /etc/trustee-gc/cdh/config.toml
       regexp: KBS_CERT
-      replace: "{{ trustee_attestation_client_trustee_kbs_cert }}"
+      replace: "{{ trustee_attestation_client_kbs_cert_content }}"
     - path: /etc/trustee-gc/aa/config.toml
       regexp: KBS_URL
-      replace: "{{ trustee_attestation_client_trustee_kbs_url }}"
+      replace: "{{ trustee_attestation_client_kbs_url }}"
     - path: /etc/trustee-gc/aa/config.toml
       regexp: KBS_CERT
-      replace: "{{ trustee_attestation_client_trustee_kbs_cert }}"
+      replace: "{{ trustee_attestation_client_kbs_cert_content }}"
   when:
     - __repo_configs_dir.stat.exists
-    - trustee_attestation_client_trustee_kbs_url != "" or trustee_attestation_client_trustee_kbs_cert != ""
+    - trustee_attestation_client_kbs_url != "" or trustee_attestation_client_kbs_cert_content != ""
 
 - name: Stat /dev/sev-guest device
   ansible.builtin.stat:
@@ -100,10 +100,6 @@
     regexp: '^#AddDevice=/dev/sev-guest'
     replace: 'AddDevice=/dev/sev-guest'
   when: __sev_guest_device.stat.exists
-
-- name: Reload systemd daemon
-  ansible.builtin.systemd:
-    daemon_reload: true
 
 - name: Get the installed Trustee Guest Components pod name
   ansible.builtin.find:
@@ -119,6 +115,13 @@
     daemon_reload: true
   when: trustee_gc_pod_name.files | length > 0
   failed_when: false
+
+- name: Write KBS certificate to /etc/trustee-gc/server.crt
+  ansible.builtin.copy:
+    content: "{{ trustee_attestation_client_kbs_cert_content }}"
+    dest: /etc/trustee-gc/server.crt
+    mode: "0644"
+  when: trustee_attestation_client_kbs_cert_content | length > 0
 
 - name: Clean up temporary repository directory
   ansible.builtin.file:

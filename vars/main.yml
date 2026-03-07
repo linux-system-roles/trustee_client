@@ -12,6 +12,8 @@ __trustee_attestation_client_trustee_gc_packages:
 __trustee_attestation_client_encrypt_disk_packages:
   - cryptsetup
   - parted
+__trustee_attestation_client_secret_registration_client_packages:
+  - jq
 __trustee_attestation_client_services: []
 # ansible_facts required by the role
 __trustee_attestation_client_required_facts:

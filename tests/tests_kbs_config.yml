@@ -6,8 +6,8 @@
   vars:
     trustee_attestation_client_trustee_gc: true
     trustee_attestation_client_encrypt_disk: false
-    trustee_attestation_client_trustee_kbs_url: "https://kbs.example.com:8080"
-    trustee_attestation_client_trustee_kbs_cert: "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkq\n-----END CERTIFICATE-----"
+    trustee_attestation_client_kbs_url: "https://kbs.example.com:8080"
+    trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkq\n-----END CERTIFICATE-----"
   roles:
     - linux-system-roles.trustee_attestation_client
   tasks:
@@ -28,10 +28,10 @@
           assert:
             that:
               - >-
-                trustee_attestation_client_trustee_kbs_url in
+                trustee_attestation_client_kbs_url in
                 (__test_cdh_content.content | b64decode)
             fail_msg: >-
-              KBS URL '{{ trustee_attestation_client_trustee_kbs_url }}' not found in
+              KBS URL '{{ trustee_attestation_client_kbs_url }}' not found in
               /etc/trustee-gc/cdh/config.toml
 
         - name: Assert CDH config does not contain the KBS_URL placeholder
@@ -61,10 +61,10 @@
           assert:
             that:
               - >-
-                trustee_attestation_client_trustee_kbs_url in
+                trustee_attestation_client_kbs_url in
                 (__test_aa_content.content | b64decode)
             fail_msg: >-
-              KBS URL '{{ trustee_attestation_client_trustee_kbs_url }}' not found in
+              KBS URL '{{ trustee_attestation_client_kbs_url }}' not found in
               /etc/trustee-gc/aa/config.toml
 
         - name: Assert AA config does not contain the KBS_URL placeholder
@@ -84,3 +84,13 @@
         fail_msg: >-
           Neither /etc/trustee-gc/cdh/config.toml nor
           /etc/trustee-gc/aa/config.toml was found after role execution
+
+    - name: Stat KBS certificate file
+      stat:
+        path: /etc/trustee-gc/server.crt
+      register: __test_kbs_cert
+
+    - name: Assert KBS certificate was written
+      assert:
+        that: __test_kbs_cert.stat.exists
+        fail_msg: "KBS certificate /etc/trustee-gc/server.crt was not written"
