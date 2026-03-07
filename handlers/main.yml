@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: MIT
 ---
-- name: Handler for trustee_attestation_client to restart services
-  service:
+- name: Reload systemd daemon for trustee
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: "restart trustee services"
+
+- name: Enable and restart trustee services
+  ansible.builtin.systemd:
     name: "{{ item }}"
+    enabled: true
     state: restarted
-  loop: "{{ __trustee_attestation_client_services }}"
+  loop: "{{ __trustee_attestation_client_services | default([]) }}"
+  listen: "restart trustee services"

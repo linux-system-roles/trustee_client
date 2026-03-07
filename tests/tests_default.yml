@@ -12,6 +12,7 @@
     - name: Collect package facts
       package_facts:
         manager: auto
+      no_log: true
 
     - name: Assert required packages are installed
       assert:
@@ -63,3 +64,25 @@
           - __test_trustee_gc_dir.stat.exists
           - __test_trustee_gc_dir.stat.isdir
         fail_msg: "Trustee GC config directory /etc/trustee-gc does not exist"
+
+    - name: Find trustee pod file
+      find:
+        paths: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        patterns: "*.pod"
+        recurse: false
+      register: __test_trustee_pod_files
+
+    - name: Assert trustee pod file exists
+      assert:
+        that: __test_trustee_pod_files.matched | int > 0
+        fail_msg: "No trustee pod file found in {{ trustee_attestation_client_quadlet_install_dir }}"
+
+    - name: Set trustee pod service name
+      ansible.builtin.set_fact:
+        __test_trustee_pod_service: "{{ (__test_trustee_pod_files.files[0].path | basename) | replace('.pod', '') }}-pod"
+
+    - name: Assert trustee pod service is running
+      ansible.builtin.service:
+        name: "{{ __test_trustee_pod_service }}"
+        state: started
+      check_mode: true

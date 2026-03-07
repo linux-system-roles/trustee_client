@@ -7,29 +7,15 @@
 Ansible role for deploying Trustee Guest Components using Podman Quadlets for
 confidential virtual machine deployments. The role downloads quadlet files and
 configuration files from a GitHub repository, installs them, and manages them as
-systemd services. The role also supports optional disk encryption functionality for
-securing additional storage devices.
+systemd services. The role also supports an optional secret registration client
+for disk key registration and optional disk encryption for securing additional
+storage devices.
 
-The role will:
+## Features
 
-1. Install Podman and Git if not already present
-2. Download Trustee Guest Components quadlet files and config files from the
-   specified GitHub repository
-3. Copy quadlet files (`.container`, `.volume`, `.network`, `.kube`) to the
-   install directory (`/etc/containers/systemd` by default)
-4. Copy config files from the repository's `configs` directory to `/etc/trustee-gc/`
-5. Replace `KBS_URL` and `KBS_CERT` placeholders in `/etc/trustee-gc/cdh/config.toml`
-   with the values from `trustee_attestation_client_trustee_kbs_url` and `trustee_attestation_client_trustee_kbs_cert`
-   variables (if provided)
-6. Reload systemd daemon
-7. Enable and start the Trustee Guest Components services
-8. (Optional) If `trustee_attestation_client_encrypt_disk` is `true`:
-   - Find an unpartitioned and unmounted disk
-   - Create a GPT partition table and partition on the disk
-   - Generate an encryption key and encrypt the partition using LUKS
-   - Format the encrypted partition with ext4
-   - Mount the encrypted disk at the specified mount point
-   - Store the encryption key in the `encrypted_disk_key` fact
+- **Trustee Client (Quadlet)**: Deploys Trustee guest components Attestation Agent(AA), Confidential Data Hub(CDH) and API Server REST(ASR) using Podman Quadlets from a Github repository
+- **Secret Registration Client**: Utility script and service which registers to Secret Registration Server on Trustee Server. It acquires the encryption key from Trustee and decrypts the designated disk upon boot
+- **Encrypt Disk**: Does LUKS2 encryption of the found empty data disk. The encryption key is provided by Secret Registration Client.
 
 Example of setting the variables:
 
@@ -37,19 +23,11 @@ Example of setting the variables:
 trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
 trustee_attestation_client_quadlet_repo_path: "quadlet"
 trustee_attestation_client_quadlet_repo_branch: "main"
-trustee_attestation_client_trustee_kbs_url: "https://kbs.example.com"
-trustee_attestation_client_trustee_kbs_cert: "/path/to/cert.pem"
+trustee_attestation_client_kbs_url: "https://kbs.example.com"
+trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+trustee_attestation_client_secret_registration_enabled: true
 trustee_attestation_client_encrypt_disk: true
 ```
-
-## Variables Exported by the Role
-
-### encrypted_disk_key
-
-If disk encryption is enabled (`trustee_attestation_client_encrypt_disk: true`), this fact
-contains the base64-encoded encryption key for the encrypted disk. This key is
-required to mount the encrypted disk after a reboot. The key is automatically
-generated during disk encryption and should be securely stored for future use.
 
 ## Example Playbook
 
@@ -63,12 +41,36 @@ passed in as parameters) is always nice for users too:
     trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
     trustee_attestation_client_quadlet_repo_path: "quadlet"
     trustee_attestation_client_quadlet_repo_branch: "main"
-    trustee_attestation_client_trustee_kbs_url: "https://kbs.example.com"
-    trustee_attestation_client_trustee_kbs_cert: "/path/to/kbs-cert.pem"
+    trustee_attestation_client_kbs_url: "https://kbs.example.com"
+    trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+    trustee_attestation_client_secret_registration_enabled: true
     trustee_attestation_client_encrypt_disk: true
   roles:
     - linux-system-roles.trustee_attestation_client
 ```
+
+## Trustee Client
+
+The task:
+
+1. Downloads the Podman Quadlets from designated repo
+2. Configures the settings in /etc/trustee-gc/
+3. Enables and starts trustee-gc.pod as a service
+
+## Secret Registration Client
+
+When enabled, this task:
+
+1. Sends registration request to Secret Registration Server via HTTPS to acquire disk encryption keys
+2. Requests above disk encryption key upon boot when Encrypt Disk is enabled to decrypt and mount disk
+
+## Encrypt Disk
+
+When enabled, this task:
+
+1. Finds the first unpartitioned and unmounted disk
+2. Requests disk encryption key from Secret Registration Client
+3. Encrypts the disk using above encryption key and mounts it at the designated path
 
 ## License
 

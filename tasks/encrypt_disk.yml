@@ -15,12 +15,16 @@
         }
       }
     '
-  register: unpartitioned_disk
+  register: __trustee_attestation_client_unpartitioned_disk
   changed_when: false
   failed_when: false
 
 - name: Encrypt disk
-  when: unpartitioned_disk.stdout != ""
+  when: __trustee_attestation_client_unpartitioned_disk.stdout != ""
+  vars:
+    __trustee_attestation_client_disk_device: "/dev/{{ __trustee_attestation_client_unpartitioned_disk.stdout }}"
+    __trustee_attestation_client_disk_partition: >-
+      /dev/{{ __trustee_attestation_client_unpartitioned_disk.stdout }}{{ 'p' if 'nvme' in __trustee_attestation_client_unpartitioned_disk.stdout else '' }}1
   block:
     - name: Ensure packages for disk encryption are installed
       ansible.builtin.package:
@@ -29,48 +33,32 @@
         use: "{{ (__trustee_attestation_client_is_ostree | d(false)) |
               ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
-    - name: Set fact with disk device path and partition path
-      ansible.builtin.set_fact:
-        disk_device: "/dev/{{ unpartitioned_disk.stdout }}"
-        disk_partition: >-
-          /dev/{{ unpartitioned_disk.stdout }}{{ 'p' if 'nvme' in unpartitioned_disk.stdout else '' }}1
-
-    - name: Create partition table and partition on disk
-      ansible.builtin.shell: |
-        parted -s {{ disk_device }} mklabel gpt
-        parted -s {{ disk_device }} mkpart primary ext4 0% 100%
-      changed_when: true
-
-    - name: Generate a temp file for the key
+    - name: Create temporary file for disk encryption key
       ansible.builtin.tempfile:
         state: file
-      register: __trustee_attestation_client_tmp_key
+        suffix: .bin
+      register: __trustee_attestation_client_secret_key_tempfile
 
-    - name: Generate a key and encrypt the partition
+    - name: Acquire disk encryption key from Secret Registration Client service
+      ansible.builtin.shell: |
+        /usr/local/bin/secret_registration_client.sh --fetch-key-to {{ __trustee_attestation_client_secret_key_tempfile.path }}
+      changed_when: true
+      no_log: true
+
+    - name: Encrypt the partition
       ansible.builtin.shell: |
         set -o pipefail
-        head -c 32 /dev/urandom | base64 > {{ __trustee_attestation_client_tmp_key.path }}
-        cryptsetup luksFormat --key-file {{ __trustee_attestation_client_tmp_key.path }} --batch-mode {{ disk_partition }}
-        cryptsetup open --key-file {{ __trustee_attestation_client_tmp_key.path }} {{ disk_partition }} encrypted-disk
+        parted -s {{ __trustee_attestation_client_disk_device }} mklabel gpt
+        parted -s {{ __trustee_attestation_client_disk_device }} mkpart primary ext4 0% 100%
+        cryptsetup luksFormat --key-file {{ __trustee_attestation_client_secret_key_tempfile.path }} --batch-mode {{ __trustee_attestation_client_disk_partition }}
+        cryptsetup open --key-file {{ __trustee_attestation_client_secret_key_tempfile.path }} {{ __trustee_attestation_client_disk_partition }} encrypted-disk
         mkfs.ext4 /dev/mapper/encrypted-disk
         [ -d {{ trustee_attestation_client_encrypt_disk_mount_point }} ] || mkdir -p {{ trustee_attestation_client_encrypt_disk_mount_point }}
         mount /dev/mapper/encrypted-disk {{ trustee_attestation_client_encrypt_disk_mount_point }}
       changed_when: true
       no_log: true
 
-    - name: Read key from remote host
-      ansible.builtin.slurp:
-        src: "{{ __trustee_attestation_client_tmp_key.path }}"
-      register: slurped_key
-      no_log: true
-
-    - name: Set encrypted disk key fact
-      ansible.builtin.set_fact:
-        encrypted_disk_key: "{{ slurped_key.content }}"
-      no_log: true
-
-    - name: Clean up temporary key file
+    - name: Clean up disk encryption key file
       ansible.builtin.file:
-        path: "{{ __trustee_attestation_client_tmp_key.path }}"
+        path: "{{ __trustee_attestation_client_secret_key_tempfile.path }}"
         state: absent
-# TODO: Add a systemd service to mount the encrypted disk at boot
