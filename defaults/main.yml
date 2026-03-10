@@ -4,16 +4,16 @@
 # This file also serves as a documentation for such a variables.
 
 # Trustee Guest Components Quadlet repository configuration
-cvm_deploy_trustee_gc: true
-cvm_deploy_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-cvm_deploy_quadlet_repo_path: "quadlet"
-cvm_deploy_quadlet_repo_branch: "main"
-cvm_deploy_quadlet_install_dir: "/etc/containers/systemd"
+trustee_attestation_client_trustee_gc: true
+trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+trustee_attestation_client_quadlet_repo_path: "quadlet"
+trustee_attestation_client_quadlet_repo_branch: "main"
+trustee_attestation_client_quadlet_install_dir: "/etc/containers/systemd"
 
 # Trustee KBS configuration
-cvm_deploy_trustee_kbs_url: ""
-cvm_deploy_trustee_kbs_cert: ""
+trustee_attestation_client_trustee_kbs_url: ""
+trustee_attestation_client_trustee_kbs_cert: ""
 
 # Encrypt disk configuration
-cvm_deploy_encrypt_disk: false
-cvm_deploy_encrypt_disk_mount_point: "/mnt/encrypted-disk"
+trustee_attestation_client_encrypt_disk: false
+trustee_attestation_client_encrypt_disk_mount_point: "/mnt/encrypted-disk"

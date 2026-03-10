@@ -1,1 +1,5 @@
-RedHat_9.yml
+# SPDX-License-Identifier: MIT
+---
+# Put internal variables here with Red Hat Enterprise Linux 9 specific values.
+
+__trustee_attestation_client_services: []

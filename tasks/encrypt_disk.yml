@@ -24,9 +24,9 @@
   block:
     - name: Ensure packages for disk encryption are installed
       ansible.builtin.package:
-        name: "{{ __cvm_deploy_encrypt_disk_packages }}"
+        name: "{{ __trustee_attestation_client_encrypt_disk_packages }}"
         state: present
-        use: "{{ (__cvm_deploy_is_ostree | d(false)) |
+        use: "{{ (__trustee_attestation_client_is_ostree | d(false)) |
               ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
     - name: Set fact with disk device path and partition path
@@ -44,23 +44,23 @@
     - name: Generate a temp file for the key
       ansible.builtin.tempfile:
         state: file
-      register: __cvm_deploy_tmp_key
+      register: __trustee_attestation_client_tmp_key
 
     - name: Generate a key and encrypt the partition
       ansible.builtin.shell: |
         set -o pipefail
-        head -c 32 /dev/urandom | base64 > {{ __cvm_deploy_tmp_key.path }}
-        cryptsetup luksFormat --key-file {{ __cvm_deploy_tmp_key.path }} --batch-mode {{ disk_partition }}
-        cryptsetup open --key-file {{ __cvm_deploy_tmp_key.path }} {{ disk_partition }} encrypted-disk
+        head -c 32 /dev/urandom | base64 > {{ __trustee_attestation_client_tmp_key.path }}
+        cryptsetup luksFormat --key-file {{ __trustee_attestation_client_tmp_key.path }} --batch-mode {{ disk_partition }}
+        cryptsetup open --key-file {{ __trustee_attestation_client_tmp_key.path }} {{ disk_partition }} encrypted-disk
         mkfs.ext4 /dev/mapper/encrypted-disk
-        [ -d {{ cvm_deploy_encrypt_disk_mount_point }} ] || mkdir -p {{ cvm_deploy_encrypt_disk_mount_point }}
-        mount /dev/mapper/encrypted-disk {{ cvm_deploy_encrypt_disk_mount_point }}
+        [ -d {{ trustee_attestation_client_encrypt_disk_mount_point }} ] || mkdir -p {{ trustee_attestation_client_encrypt_disk_mount_point }}
+        mount /dev/mapper/encrypted-disk {{ trustee_attestation_client_encrypt_disk_mount_point }}
       changed_when: true
       no_log: true
 
     - name: Read key from remote host
       ansible.builtin.slurp:
-        src: "{{ __cvm_deploy_tmp_key.path }}"
+        src: "{{ __trustee_attestation_client_tmp_key.path }}"
       register: slurped_key
       no_log: true
 
@@ -71,6 +71,6 @@
 
     - name: Clean up temporary key file
       ansible.builtin.file:
-        path: "{{ __cvm_deploy_tmp_key.path }}"
+        path: "{{ __trustee_attestation_client_tmp_key.path }}"
         state: absent
 # TODO: Add a systemd service to mount the encrypted disk at boot
