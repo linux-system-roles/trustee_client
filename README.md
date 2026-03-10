@@ -1,8 +1,8 @@
-# cvm_deploy
+# trustee_attestation_client
 
-[![ansible-lint.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/ansible-test.yml) [![codespell.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/codespell.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/codespell.yml) [![markdownlint.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/markdownlint.yml) [![qemu-kvm-integration-tests.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/qemu-kvm-integration-tests.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/qemu-kvm-integration-tests.yml) [![shellcheck.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/shellcheck.yml) [![tft.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/cvm_deploy/actions/workflows/woke.yml)
+[![ansible-lint.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-test.yml) [![codespell.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/codespell.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/codespell.yml) [![markdownlint.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/markdownlint.yml) [![qemu-kvm-integration-tests.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/qemu-kvm-integration-tests.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/qemu-kvm-integration-tests.yml) [![shellcheck.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/shellcheck.yml) [![tft.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/woke.yml)
 
-![cvm_deploy](https://github.com/linux-system-roles/cvm_deploy/workflows/tox/badge.svg)
+![trustee_attestation_client](https://github.com/linux-system-roles/trustee_attestation_client/workflows/tox/badge.svg)
 
 Ansible role for deploying Trustee Guest Components using Podman Quadlets for
 confidential virtual machine deployments. The role downloads quadlet files and
@@ -19,11 +19,11 @@ The role will:
    install directory (`/etc/containers/systemd` by default)
 4. Copy config files from the repository's `configs` directory to `/etc/trustee-gc/`
 5. Replace `KBS_URL` and `KBS_CERT` placeholders in `/etc/trustee-gc/cdh/config.toml`
-   with the values from `cvm_deploy_trustee_kbs_url` and `cvm_deploy_trustee_kbs_cert`
+   with the values from `trustee_attestation_client_trustee_kbs_url` and `trustee_attestation_client_trustee_kbs_cert`
    variables (if provided)
 6. Reload systemd daemon
 7. Enable and start the Trustee Guest Components services
-8. (Optional) If `cvm_deploy_encrypt_disk` is `true`:
+8. (Optional) If `trustee_attestation_client_encrypt_disk` is `true`:
    - Find an unpartitioned and unmounted disk
    - Create a GPT partition table and partition on the disk
    - Generate an encryption key and encrypt the partition using LUKS
@@ -34,19 +34,19 @@ The role will:
 Example of setting the variables:
 
 ```yaml
-cvm_deploy_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-cvm_deploy_quadlet_repo_path: "quadlet"
-cvm_deploy_quadlet_repo_branch: "main"
-cvm_deploy_trustee_kbs_url: "https://kbs.example.com"
-cvm_deploy_trustee_kbs_cert: "/path/to/cert.pem"
-cvm_deploy_encrypt_disk: true
+trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+trustee_attestation_client_quadlet_repo_path: "quadlet"
+trustee_attestation_client_quadlet_repo_branch: "main"
+trustee_attestation_client_trustee_kbs_url: "https://kbs.example.com"
+trustee_attestation_client_trustee_kbs_cert: "/path/to/cert.pem"
+trustee_attestation_client_encrypt_disk: true
 ```
 
 ## Variables Exported by the Role
 
 ### encrypted_disk_key
 
-If disk encryption is enabled (`cvm_deploy_encrypt_disk: true`), this fact
+If disk encryption is enabled (`trustee_attestation_client_encrypt_disk: true`), this fact
 contains the base64-encoded encryption key for the encrypted disk. This key is
 required to mount the encrypted disk after a reboot. The key is automatically
 generated during disk encryption and should be securely stored for future use.
@@ -60,14 +60,14 @@ passed in as parameters) is always nice for users too:
 - name: Deploy Trustee Guest Components using Podman Quadlets
   hosts: all
   vars:
-    cvm_deploy_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-    cvm_deploy_quadlet_repo_path: "quadlet"
-    cvm_deploy_quadlet_repo_branch: "main"
-    cvm_deploy_trustee_kbs_url: "https://kbs.example.com"
-    cvm_deploy_trustee_kbs_cert: "/path/to/kbs-cert.pem"
-    cvm_deploy_encrypt_disk: true
+    trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+    trustee_attestation_client_quadlet_repo_path: "quadlet"
+    trustee_attestation_client_quadlet_repo_branch: "main"
+    trustee_attestation_client_trustee_kbs_url: "https://kbs.example.com"
+    trustee_attestation_client_trustee_kbs_cert: "/path/to/kbs-cert.pem"
+    trustee_attestation_client_encrypt_disk: true
   roles:
-    - linux-system-roles.cvm_deploy
+    - linux-system-roles.trustee_attestation_client
 ```
 
 ## License

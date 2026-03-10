@@ -1,1 +1,5 @@
-RedHat_7.yml
+# SPDX-License-Identifier: MIT
+---
+# Put internal variables here with Red Hat Enterprise Linux 7 specific values.
+
+__trustee_attestation_client_services: []
