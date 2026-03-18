@@ -136,15 +136,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <nav id="TOC">
 <h1 class="toc-title">Contents</h1>
 <ul>
-<li><a href="#variables-exported-by-the-role"
-id="toc-variables-exported-by-the-role">Variables Exported by the
-Role</a>
-<ul>
-<li><a href="#encrypted_disk_key"
-id="toc-encrypted_disk_key">encrypted_disk_key</a></li>
-</ul></li>
+<li><a href="#features" id="toc-features">Features</a></li>
 <li><a href="#example-playbook" id="toc-example-playbook">Example
 Playbook</a></li>
+<li><a href="#trustee-client" id="toc-trustee-client">Trustee
+Client</a></li>
+<li><a href="#secret-registration-client"
+id="toc-secret-registration-client">Secret Registration Client</a></li>
+<li><a href="#encrypt-disk" id="toc-encrypt-disk">Encrypt Disk</a></li>
 <li><a href="#license" id="toc-license">License</a></li>
 <li><a href="#author-information" id="toc-author-information">Author
 Information</a></li>
@@ -158,54 +157,31 @@ alt="trustee_attestation_client" /></p>
 Quadlets for confidential virtual machine deployments. The role
 downloads quadlet files and configuration files from a GitHub
 repository, installs them, and manages them as systemd services. The
-role also supports optional disk encryption functionality for securing
-additional storage devices.</p>
-<p>The role will:</p>
-<ol type="1">
-<li>Install Podman and Git if not already present</li>
-<li>Download Trustee Guest Components quadlet files and config files
-from the specified GitHub repository</li>
-<li>Copy quadlet files (<code>.container</code>, <code>.volume</code>,
-<code>.network</code>, <code>.kube</code>) to the install directory
-(<code>/etc/containers/systemd</code> by default)</li>
-<li>Copy config files from the repository's <code>configs</code>
-directory to <code>/etc/trustee-gc/</code></li>
-<li>Replace <code>KBS_URL</code> and <code>KBS_CERT</code> placeholders
-in <code>/etc/trustee-gc/cdh/config.toml</code> with the values from
-<code>trustee_attestation_client_trustee_kbs_url</code> and
-<code>trustee_attestation_client_trustee_kbs_cert</code> variables (if
-provided)</li>
-<li>Reload systemd daemon</li>
-<li>Enable and start the Trustee Guest Components services</li>
-<li>(Optional) If <code>trustee_attestation_client_encrypt_disk</code>
-is <code>true</code>:
+role also supports an optional secret registration client for disk key
+registration and optional disk encryption for securing additional
+storage devices.</p>
+<h1 id="features">Features</h1>
 <ul>
-<li>Find an unpartitioned and unmounted disk</li>
-<li>Create a GPT partition table and partition on the disk</li>
-<li>Generate an encryption key and encrypt the partition using LUKS</li>
-<li>Format the encrypted partition with ext4</li>
-<li>Mount the encrypted disk at the specified mount point</li>
-<li>Store the encryption key in the <code>encrypted_disk_key</code>
-fact</li>
-</ul></li>
-</ol>
+<li><strong>Trustee Client (Quadlet)</strong>: Deploys Trustee guest
+components Attestation Agent(AA), Confidential Data Hub(CDH) and API
+Server REST(ASR) using Podman Quadlets from a Github repository</li>
+<li><strong>Secret Registration Client</strong>: Utility script and
+service which registers to Secret Registration Server on Trustee Server.
+It acquires the encryption key from Trustee and decrypts the designated
+disk upon boot</li>
+<li><strong>Encrypt Disk</strong>: Does LUKS2 encryption of the found
+empty data disk. The encryption key is provided by Secret Registration
+Client.</li>
+</ul>
 <p>Example of setting the variables:</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_quadlet_repo_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://github.com/litian1992/trustee-gc-quadlet-rhel&quot;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_quadlet_repo_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;quadlet&quot;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_quadlet_repo_branch</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;main&quot;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_trustee_kbs_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://kbs.example.com&quot;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_trustee_kbs_cert</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/path/to/cert.pem&quot;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_encrypt_disk</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
-<h1 id="variables-exported-by-the-role">Variables Exported by the
-Role</h1>
-<h2 id="encrypted_disk_key">encrypted_disk_key</h2>
-<p>If disk encryption is enabled
-(<code>trustee_attestation_client_encrypt_disk: true</code>), this fact
-contains the base64-encoded encryption key for the encrypted disk. This
-key is required to mount the encrypted disk after a reboot. The key is
-automatically generated during disk encryption and should be securely
-stored for future use.</p>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_kbs_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://kbs.example.com&quot;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_kbs_cert_content</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;-----BEGIN CERTIFICATE-----</span><span class="sc">\n</span><span class="st">...</span><span class="sc">\n</span><span class="st">-----END CERTIFICATE-----&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_secret_registration_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">trustee_attestation_client_encrypt_disk</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
 <h1 id="example-playbook">Example Playbook</h1>
 <p>Including an example of how to use your role (for instance, with
 variables passed in as parameters) is always nice for users too:</p>
@@ -216,11 +192,35 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_quadlet_repo_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://github.com/litian1992/trustee-gc-quadlet-rhel&quot;</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_quadlet_repo_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;quadlet&quot;</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_quadlet_repo_branch</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;main&quot;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_trustee_kbs_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://kbs.example.com&quot;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_trustee_kbs_cert</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/path/to/kbs-cert.pem&quot;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_encrypt_disk</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.trustee_attestation_client</span></span></code></pre></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_kbs_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://kbs.example.com&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_kbs_cert_content</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;-----BEGIN CERTIFICATE-----</span><span class="sc">\n</span><span class="st">...</span><span class="sc">\n</span><span class="st">-----END CERTIFICATE-----&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_secret_registration_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trustee_attestation_client_encrypt_disk</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.trustee_attestation_client</span></span></code></pre></div>
+<h1 id="trustee-client">Trustee Client</h1>
+<p>The task:</p>
+<ol type="1">
+<li>Downloads the Podman Quadlets from designated repo</li>
+<li>Configures the settings in /etc/trustee-gc/</li>
+<li>Enables and starts trustee-gc.pod as a service</li>
+</ol>
+<h1 id="secret-registration-client">Secret Registration Client</h1>
+<p>When enabled, this task:</p>
+<ol type="1">
+<li>Sends registration request to Secret Registration Server via HTTPS
+to acquire disk encryption keys</li>
+<li>Requests above disk encryption key upon boot when Encrypt Disk is
+enabled to decrypt and mount disk</li>
+</ol>
+<h1 id="encrypt-disk">Encrypt Disk</h1>
+<p>When enabled, this task:</p>
+<ol type="1">
+<li>Finds the first unpartitioned and unmounted disk</li>
+<li>Requests disk encryption key from Secret Registration Client</li>
+<li>Encrypts the disk using above encryption key and mounts it at the
+designated path</li>
+</ol>
 <h1 id="license">License</h1>
 <p>Whenever possible, please prefer MIT.</p>
 <h1 id="author-information">Author Information</h1>
