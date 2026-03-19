@@ -75,17 +75,17 @@
       ansible.builtin.assert:
         that:
           - >-
-            '/dev/mapper/encrypted-disk' in
+            '/dev/mapper/trustee_client_encrypted_disk_0' in
             (__test_findmnt.stdout | trim)
         fail_msg: >-
-          Expected /dev/mapper/encrypted-disk to be mounted at
+          Expected /dev/mapper/trustee_client_encrypted_disk_0 to be mounted at
           {{ trustee_client_encrypt_disk_mount_point }} but found:
           {{ __test_findmnt.stdout }}
       when: not __test_skip_encrypt_assertions
 
     - name: Stat the LUKS mapper device
       ansible.builtin.stat:
-        path: /dev/mapper/encrypted-disk
+        path: /dev/mapper/trustee_client_encrypted_disk_0
       register: __test_mapper_dev
       when: not __test_skip_encrypt_assertions
 
@@ -93,7 +93,7 @@
       ansible.builtin.assert:
         that:
           - __test_mapper_dev.stat.exists
-        fail_msg: "LUKS mapper device /dev/mapper/encrypted-disk does not exist"
+        fail_msg: "LUKS mapper device /dev/mapper/trustee_client_encrypted_disk_0 does not exist"
       when: not __test_skip_encrypt_assertions
 
     - name: Assert encrypted_disk_key fact was set
@@ -137,3 +137,113 @@
           /etc/containers/storage.conf does not reference the encrypted
           disk mount point {{ trustee_client_encrypt_disk_mount_point }}
       when: not __test_skip_encrypt_assertions
+
+- name: Ensure disk encryption works with systemd-cryptenroll when secret_registration_client is disabled
+  hosts: all
+  gather_facts: false
+  vars:
+    trustee_client_trustee_gc: false
+    trustee_client_encrypt_disk: true
+    trustee_client_secret_registration_enabled: false
+    trustee_client_encrypt_disk_mount_point: /mnt/encrypted-disk
+  tasks:
+    - name: Check for an unpartitioned disk device
+      ansible.builtin.shell: |
+        set -o pipefail
+        lsblk -n -o NAME,TYPE,PKNAME | awk '
+          $2=="disk" && $1 !~ /^zram|^loop|^dm/ { disk=$1; haspart[disk]=0 }
+          $2=="part" { parent=$3; if (parent in haspart) haspart[parent]=1 }
+          END {
+            for (d in haspart) {
+              if (haspart[d] == 0) {
+                print d
+                exit 0
+              }
+            }
+          }
+        '
+      register: __test_unpartitioned_disk
+      changed_when: false
+      failed_when: false
+
+    - name: Set fact when no unpartitioned disk is available
+      ansible.builtin.set_fact:
+        __test_skip_cryptenroll_assertions: "{{ __test_unpartitioned_disk.stdout | trim == '' }}"
+
+    - name: Check systemd-cryptenroll exists
+      ansible.builtin.command: command -v systemd-cryptenroll
+      register: __test_cryptenroll_check
+      changed_when: false
+      failed_when: false
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Set fact when systemd-cryptenroll is not available
+      ansible.builtin.set_fact:
+        __test_skip_cryptenroll_assertions: "{{ __test_skip_cryptenroll_assertions or __test_cryptenroll_check.rc != 0 }}"
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Run trustee_client role with disk encryption (cryptenroll path)
+      ansible.builtin.include_role:
+        name: linux-system-roles.trustee_client
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Stat the encrypted disk mount point
+      ansible.builtin.stat:
+        path: "{{ trustee_client_encrypt_disk_mount_point }}"
+      register: __test_mount_point
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Assert mount point directory exists
+      ansible.builtin.assert:
+        that:
+          - __test_mount_point.stat.exists
+          - __test_mount_point.stat.isdir
+        fail_msg: >-
+          Encrypted disk mount point
+          {{ trustee_client_encrypt_disk_mount_point }} does not exist
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Assert the encrypted disk is mounted
+      ansible.builtin.command: findmnt --noheadings --output SOURCE {{ trustee_client_encrypt_disk_mount_point }}
+      register: __test_findmnt
+      changed_when: false
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Assert the mounted device is the LUKS mapper device
+      ansible.builtin.assert:
+        that:
+          - __test_findmnt.rc == 0
+          - "'/dev/mapper/trustee_client_encrypted_disk_0' in (__test_findmnt.stdout | default('') | trim)"
+        fail_msg: >-
+          Expected /dev/mapper/trustee_client_encrypted_disk_0 in the output of findmnt to be mounted at
+          {{ trustee_client_encrypt_disk_mount_point }} but found:
+          {{ __test_findmnt.stdout | default('') }}
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Assert crypttab contains trustee_client_encrypted_disk_0 entry
+      ansible.builtin.slurp:
+        src: /etc/crypttab
+      register: __test_crypttab
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Verify crypttab has trustee_client_encrypted_disk_0 with tpm2-device=auto
+      ansible.builtin.assert:
+        that:
+          - "'trustee_client_encrypted_disk_0' in (__test_crypttab.content | b64decode)"
+          - "'tpm2-device=auto' in (__test_crypttab.content | b64decode)"
+        fail_msg: "/etc/crypttab does not contain trustee_client_encrypted_disk_0 entry with tpm2-device=auto"
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Assert fstab contains encrypted disk mount
+      ansible.builtin.slurp:
+        src: /etc/fstab
+      register: __test_fstab
+      when: not __test_skip_cryptenroll_assertions
+
+    - name: Verify fstab has encrypted disk mount point
+      ansible.builtin.assert:
+        that:
+          - trustee_client_encrypt_disk_mount_point in (__test_fstab.content | b64decode)
+          - "'/dev/mapper/trustee_client_encrypted_disk_0' in (__test_fstab.content | b64decode)"
+        fail_msg: "/etc/fstab does not contain encrypted disk mount entry"
+      when: not __test_skip_cryptenroll_assertions

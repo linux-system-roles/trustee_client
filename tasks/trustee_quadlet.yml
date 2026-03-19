@@ -69,31 +69,35 @@
 
 - name: Set KBS cert content from path or explicit content
   ansible.builtin.set_fact:
-    __trustee_client_kbs_cert_content: "{{ trustee_client_kbs_cert_content if (trustee_client_kbs_cert_content != '') else (lookup('file', trustee_client_kbs_cert) if (trustee_client_kbs_cert != '') else '') }}"
+    __trustee_client_kbs_cert_content: "{{ trustee_client_kbs_cert_content
+      if (trustee_client_kbs_cert_content | length > 0)
+      else lookup('file', trustee_client_kbs_cert_src)
+      if (trustee_client_kbs_cert_src | length > 0) else '' }}"
   when: __repo_configs_dir.stat.exists
-    - trustee_client_kbs_cert_content != "" or trustee_client_kbs_cert != ""
 
-- name: Replace KBS_URL and KBS_CERT in config.toml files
+- name: Replace KBS_URL in config.toml files
   ansible.builtin.replace:
-    path: "{{ item.path }}"
-    regexp: "{{ item.regexp }}"
-    replace: "{{ item.replace }}"
+    path: "{{ item }}"
+    regexp: KBS_URL
+    replace: "{{ trustee_client_kbs_url }}"
   loop:
-    - path: /etc/trustee-gc/cdh/config.toml
-      regexp: KBS_URL
-      replace: "{{ trustee_client_kbs_url }}"
-    - path: /etc/trustee-gc/cdh/config.toml
-      regexp: KBS_CERT
-      replace: "{{ __trustee_client_kbs_cert_content }}"
-    - path: /etc/trustee-gc/aa/config.toml
-      regexp: KBS_URL
-      replace: "{{ trustee_client_kbs_url }}"
-    - path: /etc/trustee-gc/aa/config.toml
-      regexp: KBS_CERT
-      replace: "{{ __trustee_client_kbs_cert_content }}"
+    - /etc/trustee-gc/cdh/config.toml
+    - /etc/trustee-gc/aa/config.toml
   when:
     - __repo_configs_dir.stat.exists
-    - trustee_client_kbs_url != "" or __trustee_client_kbs_cert_content != ""
+    - trustee_client_kbs_url | length > 0
+
+- name: Replace KBS_CERT in config.toml files
+  ansible.builtin.replace:
+    path: "{{ item }}"
+    regexp: KBS_CERT
+    replace: "{{ __trustee_client_kbs_cert_content }}"
+  loop:
+    - /etc/trustee-gc/cdh/config.toml
+    - /etc/trustee-gc/aa/config.toml
+  when:
+    - __repo_configs_dir.stat.exists
+    - __trustee_client_kbs_cert_content | length > 0
 
 - name: Stat /dev/sev-guest device
   ansible.builtin.stat:

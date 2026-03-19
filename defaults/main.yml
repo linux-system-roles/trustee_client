@@ -13,7 +13,7 @@ trustee_client_quadlet_install_dir: "/etc/containers/systemd"
 # Trustee KBS configuration
 trustee_client_kbs_url: ""
 trustee_client_kbs_cert_content: ""
-trustee_client_kbs_cert: ""  # Path to cert file (alternative to trustee_client_kbs_cert_content)
+trustee_client_kbs_cert_src: ""  # Path to cert file (alternative to trustee_client_kbs_cert_content)
 
 # Secret registration client configuration
 trustee_client_secret_registration_enabled: false

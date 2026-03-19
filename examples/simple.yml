@@ -11,7 +11,7 @@
     trustee_client_kbs_url: "https://kbs.example.com"
     # Use either cert content or path to cert file:
     trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
-    # trustee_client_kbs_cert: "/path/to/server.crt"
+    # trustee_client_kbs_cert_src: "/path/to/server.crt"
     trustee_client_secret_registration_enabled: false
   roles:
     - linux-system-roles.trustee_client
