@@ -43,6 +43,23 @@
       ansible.builtin.shell: |
         /usr/local/bin/secret_registration_client.sh --fetch-key-to {{ __trustee_client_secret_key_tempfile.path }}
       changed_when: true
+      when: trustee_client_secret_registration_enabled | bool
+      no_log: true
+
+    - name: Check systemd-cryptenroll command exists
+      ansible.builtin.command: command -v systemd-cryptenroll
+      register: __trustee_client_cryptenroll_check
+      changed_when: false
+      when: not trustee_client_secret_registration_enabled | bool
+
+    - name: Create a random disk encryption key
+      ansible.builtin.shell: |
+        set -o pipefail
+        head -c 32 /dev/urandom | base64 > {{ __trustee_client_secret_key_tempfile.path }}
+      changed_when: true
+      when:
+        - __trustee_client_cryptenroll_check is success
+        - not trustee_client_secret_registration_enabled | bool
       no_log: true
 
     - name: Encrypt the partition
@@ -51,12 +68,53 @@
         parted -s {{ __trustee_client_disk_device }} mklabel gpt
         parted -s {{ __trustee_client_disk_device }} mkpart primary ext4 0% 100%
         cryptsetup luksFormat --key-file {{ __trustee_client_secret_key_tempfile.path }} --batch-mode {{ __trustee_client_disk_partition }}
-        cryptsetup open --key-file {{ __trustee_client_secret_key_tempfile.path }} {{ __trustee_client_disk_partition }} encrypted-disk
-        mkfs.ext4 /dev/mapper/encrypted-disk
+        cryptsetup open --key-file {{ __trustee_client_secret_key_tempfile.path }} {{ __trustee_client_disk_partition }} trustee_client_encrypted_disk_0
+        mkfs.ext4 /dev/mapper/trustee_client_encrypted_disk_0
         [ -d {{ trustee_client_encrypt_disk_mount_point }} ] || mkdir -p {{ trustee_client_encrypt_disk_mount_point }}
-        mount /dev/mapper/encrypted-disk {{ trustee_client_encrypt_disk_mount_point }}
+        mount /dev/mapper/trustee_client_encrypted_disk_0 {{ trustee_client_encrypt_disk_mount_point }}
       changed_when: true
       no_log: true
+
+    - name: TPM2 cryptenroll and configure crypttab/fstab
+      when:
+        - __trustee_client_cryptenroll_check is success
+        - not trustee_client_secret_registration_enabled | bool
+      block:
+        - name: Bind TPM2 slot to LUKS volume
+          ansible.builtin.shell: |
+            systemd-cryptenroll {{ __trustee_client_disk_partition }} --tpm2-device=auto --tpm2-pcrs=7 --unlock-key-file={{ __trustee_client_secret_key_tempfile.path }}
+            systemd-cryptenroll {{ __trustee_client_disk_partition }} --wipe-slot=password
+          changed_when: true
+          no_log: true
+
+        - name: Get UUID of the LUKS partition
+          ansible.builtin.command: "lsblk -dno UUID {{ __trustee_client_disk_partition }}"
+          register: __luks_uuid
+          changed_when: false
+
+        - name: Retrieve facts for the /etc/crypttab file
+          stat:
+            path: /etc/crypttab
+          register: __trustee_client_crypttab
+          changed_when: false
+
+        - name: Configure /etc/crypttab for TPM auto-unlock
+          ansible.builtin.lineinfile:
+            path: /etc/crypttab
+            line: "trustee_client_encrypted_disk_0    UUID={{ __luks_uuid.stdout }}    none    tpm2-device=auto"
+            regexp: '^trustee_client_encrypted_disk_0\s+'
+            create: true
+            mode: "{{ __trustee_client_crypttab.stat.mode | d('0600') }}"
+            owner: "{{ __trustee_client_crypttab.stat.pw_name | d('root') }}"
+            group: "{{ __trustee_client_crypttab.stat.gr_name | d('root') }}"
+
+        - name: Configure /etc/fstab and mount volume
+          ansible.posix.mount:
+            path: "{{ trustee_client_encrypt_disk_mount_point }}"
+            src: /dev/mapper/trustee_client_encrypted_disk_0
+            fstype: ext4
+            opts: defaults,x-systemd.requires=systemd-cryptsetup@trustee_client_encrypted_disk0.service
+            state: mounted
 
     - name: Clean up disk encryption key file
       ansible.builtin.file:

@@ -24,7 +24,7 @@ trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadl
 trustee_client_quadlet_repo_path: "quadlet"
 trustee_client_quadlet_repo_branch: "main"
 trustee_client_kbs_url: "https://kbs.example.com"
-trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"  # or trustee_client_kbs_cert: "/path/to/server.crt"
+trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"  # or trustee_client_kbs_cert_src: "/path/to/server.crt"
 trustee_client_secret_registration_enabled: true
 trustee_client_encrypt_disk: true
 ```
@@ -66,11 +66,14 @@ When enabled, this task:
 
 ## Encrypt Disk
 
-When enabled, this task:
+An unpartitioned empty disk must be attached to the target. When enabled, this task:
 
 1. Finds the first unpartitioned and unmounted disk
-2. Requests disk encryption key from Secret Registration Client
-3. Encrypts the disk using above encryption key and mounts it at the designated path
+2. Encrypts the disk using a key from either:
+  a. secret key fetched using Secret Registration Client (when enabled), or
+  b. `systemd-cryptenroll` which binds to PCR 7
+3. Mounts it at the designated path
+4. Sets up automatic unlock and mount either with Secret Registration Client service or /etc/crypttab with `systemd-cryptenroll`
 
 ## License
 

@@ -109,6 +109,7 @@
       ansible.builtin.copy:
         content: "{{ __test_cert_content }}"
         dest: "{{ playbook_dir }}/kbs_test_cert.crt"
+        mode: "0644"
       run_once: true
       delegate_to: localhost
 
@@ -116,7 +117,7 @@
       ansible.builtin.include_role:
         name: linux-system-roles.trustee_client
       vars:
-        trustee_client_kbs_cert: "{{ playbook_dir }}/kbs_test_cert.crt"
+        trustee_client_kbs_cert_src: "{{ playbook_dir }}/kbs_test_cert.crt"
 
     - name: Stat CDH config file
       ansible.builtin.stat:
