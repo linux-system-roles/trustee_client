@@ -1,8 +1,8 @@
-# trustee_attestation_client
+# trustee_client
 
-[![ansible-lint.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/ansible-test.yml) [![codespell.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/codespell.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/codespell.yml) [![markdownlint.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/markdownlint.yml) [![qemu-kvm-integration-tests.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/qemu-kvm-integration-tests.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/qemu-kvm-integration-tests.yml) [![shellcheck.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/shellcheck.yml) [![tft.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/trustee_attestation_client/actions/workflows/woke.yml)
+[![ansible-lint.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/ansible-test.yml) [![codespell.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/codespell.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/codespell.yml) [![markdownlint.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/markdownlint.yml) [![qemu-kvm-integration-tests.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/qemu-kvm-integration-tests.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/qemu-kvm-integration-tests.yml) [![shellcheck.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/shellcheck.yml) [![tft.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/trustee_client/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/trustee_client/actions/workflows/woke.yml)
 
-![trustee_attestation_client](https://github.com/linux-system-roles/trustee_attestation_client/workflows/tox/badge.svg)
+![trustee_client](https://github.com/linux-system-roles/trustee_client/workflows/tox/badge.svg)
 
 Ansible role for deploying Trustee Guest Components using Podman Quadlets for
 confidential virtual machine deployments. The role downloads quadlet files and
@@ -20,13 +20,13 @@ storage devices.
 Example of setting the variables:
 
 ```yaml
-trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-trustee_attestation_client_quadlet_repo_path: "quadlet"
-trustee_attestation_client_quadlet_repo_branch: "main"
-trustee_attestation_client_kbs_url: "https://kbs.example.com"
-trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
-trustee_attestation_client_secret_registration_enabled: true
-trustee_attestation_client_encrypt_disk: true
+trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+trustee_client_quadlet_repo_path: "quadlet"
+trustee_client_quadlet_repo_branch: "main"
+trustee_client_kbs_url: "https://kbs.example.com"
+trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+trustee_client_secret_registration_enabled: true
+trustee_client_encrypt_disk: true
 ```
 
 ## Example Playbook
@@ -38,15 +38,15 @@ passed in as parameters) is always nice for users too:
 - name: Deploy Trustee Guest Components using Podman Quadlets
   hosts: all
   vars:
-    trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-    trustee_attestation_client_quadlet_repo_path: "quadlet"
-    trustee_attestation_client_quadlet_repo_branch: "main"
-    trustee_attestation_client_kbs_url: "https://kbs.example.com"
-    trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
-    trustee_attestation_client_secret_registration_enabled: true
-    trustee_attestation_client_encrypt_disk: true
+    trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+    trustee_client_quadlet_repo_path: "quadlet"
+    trustee_client_quadlet_repo_branch: "main"
+    trustee_client_kbs_url: "https://kbs.example.com"
+    trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+    trustee_client_secret_registration_enabled: true
+    trustee_client_encrypt_disk: true
   roles:
-    - linux-system-roles.trustee_attestation_client
+    - linux-system-roles.trustee_client
 ```
 
 ## Trustee Client

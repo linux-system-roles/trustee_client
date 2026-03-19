@@ -4,19 +4,19 @@
 # This file also serves as a documentation for such a variables.
 
 # Trustee Guest Components Quadlet repository configuration
-trustee_attestation_client_trustee_gc: true
-trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-trustee_attestation_client_quadlet_repo_path: "quadlet"
-trustee_attestation_client_quadlet_repo_branch: "main"
-trustee_attestation_client_quadlet_install_dir: "/etc/containers/systemd"
+trustee_client_trustee_gc: true
+trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+trustee_client_quadlet_repo_path: "quadlet"
+trustee_client_quadlet_repo_branch: "main"
+trustee_client_quadlet_install_dir: "/etc/containers/systemd"
 
 # Trustee KBS configuration
-trustee_attestation_client_kbs_url: ""
-trustee_attestation_client_kbs_cert_content: ""
+trustee_client_kbs_url: ""
+trustee_client_kbs_cert_content: ""
 
 # Secret registration client configuration
-trustee_attestation_client_secret_registration_enabled: false
+trustee_client_secret_registration_enabled: false
 
 # Encrypt disk configuration
-trustee_attestation_client_encrypt_disk: false
-trustee_attestation_client_encrypt_disk_mount_point: "/mnt/encrypted-disk"
+trustee_client_encrypt_disk: false
+trustee_client_encrypt_disk_mount_point: "/mnt/encrypted-disk"

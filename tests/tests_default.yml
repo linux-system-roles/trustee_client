@@ -4,10 +4,10 @@
   hosts: all
   gather_facts: false  # test that role works without pre-gathered facts
   vars:
-    trustee_attestation_client_trustee_gc: true
-    trustee_attestation_client_encrypt_disk: false
+    trustee_client_trustee_gc: true
+    trustee_client_encrypt_disk: false
   roles:
-    - linux-system-roles.trustee_attestation_client
+    - linux-system-roles.trustee_client
   tasks:
     - name: Collect package facts
       package_facts:
@@ -19,11 +19,11 @@
         that:
           - item in ansible_facts.packages
         fail_msg: "Required package '{{ item }}' is not installed"
-      loop: "{{ __trustee_attestation_client_trustee_gc_packages }}"
+      loop: "{{ __trustee_client_trustee_gc_packages }}"
 
     - name: Stat the quadlet install directory
       stat:
-        path: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        path: "{{ trustee_client_quadlet_install_dir }}"
       register: __test_quadlet_dir
 
     - name: Assert quadlet install directory exists
@@ -32,12 +32,12 @@
           - __test_quadlet_dir.stat.exists
           - __test_quadlet_dir.stat.isdir
         fail_msg: >-
-          Quadlet install directory {{ trustee_attestation_client_quadlet_install_dir }}
+          Quadlet install directory {{ trustee_client_quadlet_install_dir }}
           does not exist
 
     - name: Find deployed quadlet files
       find:
-        paths: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        paths: "{{ trustee_client_quadlet_install_dir }}"
         patterns:
           - "*.container"
           - "*.volume"
@@ -51,7 +51,7 @@
         that:
           - __test_quadlet_files.files | length > 0
         fail_msg: >-
-          No quadlet files found in {{ trustee_attestation_client_quadlet_install_dir }}
+          No quadlet files found in {{ trustee_client_quadlet_install_dir }}
 
     - name: Stat the trustee-gc config directory
       stat:
@@ -67,7 +67,7 @@
 
     - name: Find trustee pod file
       find:
-        paths: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        paths: "{{ trustee_client_quadlet_install_dir }}"
         patterns: "*.pod"
         recurse: false
       register: __test_trustee_pod_files
@@ -75,7 +75,7 @@
     - name: Assert trustee pod file exists
       assert:
         that: __test_trustee_pod_files.matched | int > 0
-        fail_msg: "No trustee pod file found in {{ trustee_attestation_client_quadlet_install_dir }}"
+        fail_msg: "No trustee pod file found in {{ trustee_client_quadlet_install_dir }}"
 
     - name: Set trustee pod service name
       ansible.builtin.set_fact:

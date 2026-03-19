@@ -5,19 +5,19 @@
 
 - name: Deploy Trustee Guest Components using Podman Quadlets
   include_tasks: trustee_quadlet.yml
-  when: trustee_attestation_client_trustee_gc | bool
+  when: trustee_client_trustee_gc | bool
 
 - name: Deploy Secret Registration Client Service
   include_tasks: secret_registration_client.yml
   when:
-    - trustee_attestation_client_secret_registration_enabled | bool
-    - trustee_attestation_client_trustee_gc | bool
+    - trustee_client_secret_registration_enabled | bool
+    - trustee_client_trustee_gc | bool
 
 - name: Create encrypted disk partition
   include_tasks: encrypt_disk.yml
   when:
-    - trustee_attestation_client_encrypt_disk | bool
-    - trustee_attestation_client_secret_registration_enabled | bool
+    - trustee_client_encrypt_disk | bool
+    - trustee_client_secret_registration_enabled | bool
 
 - name: Flush handlers to ensure services are started
   ansible.builtin.meta: flush_handlers

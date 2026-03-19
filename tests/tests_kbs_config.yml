@@ -4,12 +4,12 @@
   hosts: all
   gather_facts: false
   vars:
-    trustee_attestation_client_trustee_gc: true
-    trustee_attestation_client_encrypt_disk: false
-    trustee_attestation_client_kbs_url: "https://kbs.example.com:8080"
-    trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkq\n-----END CERTIFICATE-----"
+    trustee_client_trustee_gc: true
+    trustee_client_encrypt_disk: false
+    trustee_client_kbs_url: "https://kbs.example.com:8080"
+    trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkq\n-----END CERTIFICATE-----"
   roles:
-    - linux-system-roles.trustee_attestation_client
+    - linux-system-roles.trustee_client
   tasks:
     - name: Stat CDH config file
       stat:
@@ -28,10 +28,10 @@
           assert:
             that:
               - >-
-                trustee_attestation_client_kbs_url in
+                trustee_client_kbs_url in
                 (__test_cdh_content.content | b64decode)
             fail_msg: >-
-              KBS URL '{{ trustee_attestation_client_kbs_url }}' not found in
+              KBS URL '{{ trustee_client_kbs_url }}' not found in
               /etc/trustee-gc/cdh/config.toml
 
         - name: Assert CDH config does not contain the KBS_URL placeholder
@@ -61,10 +61,10 @@
           assert:
             that:
               - >-
-                trustee_attestation_client_kbs_url in
+                trustee_client_kbs_url in
                 (__test_aa_content.content | b64decode)
             fail_msg: >-
-              KBS URL '{{ trustee_attestation_client_kbs_url }}' not found in
+              KBS URL '{{ trustee_client_kbs_url }}' not found in
               /etc/trustee-gc/aa/config.toml
 
         - name: Assert AA config does not contain the KBS_URL placeholder

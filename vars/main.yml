@@ -5,18 +5,18 @@
 # value in a platform/version specific file in vars/
 
 # Examples of non-distribution specific (generic) internal variables:
-__trustee_attestation_client_foo_config: foo.conf
-__trustee_attestation_client_trustee_gc_packages:
+__trustee_client_foo_config: foo.conf
+__trustee_client_trustee_gc_packages:
   - podman
   - git
-__trustee_attestation_client_encrypt_disk_packages:
+__trustee_client_encrypt_disk_packages:
   - cryptsetup
   - parted
-__trustee_attestation_client_secret_registration_client_packages:
+__trustee_client_secret_registration_client_packages:
   - jq
-__trustee_attestation_client_services: []
+__trustee_client_services: []
 # ansible_facts required by the role
-__trustee_attestation_client_required_facts:
+__trustee_client_required_facts:
   - distribution
   - distribution_major_version
   - distribution_version
@@ -24,23 +24,23 @@ __trustee_attestation_client_required_facts:
 # the subsets of ansible_facts that need to be gathered in case any of the
 # facts in required_facts is missing; see the documentation of
 # the 'gather_subset' parameter of the 'setup' module
-__trustee_attestation_client_required_facts_subsets: "{{ ['!all', '!min'] +
-  __trustee_attestation_client_required_facts }}"
+__trustee_client_required_facts_subsets: "{{ ['!all', '!min'] +
+  __trustee_client_required_facts }}"
 
 # BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
 # Ansible distribution identifiers that the role treats like RHEL
-__trustee_attestation_client_rh_distros:
+__trustee_client_rh_distros:
   - AlmaLinux
   - CentOS
   - RedHat
   - Rocky
 
 # Same as above but includes Fedora
-__trustee_attestation_client_rh_distros_fedora: "{{ __trustee_attestation_client_rh_distros + ['Fedora'] }}"
+__trustee_client_rh_distros_fedora: "{{ __trustee_client_rh_distros + ['Fedora'] }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone
-__trustee_attestation_client_is_rh_distro: "{{ ansible_facts['distribution'] in __trustee_attestation_client_rh_distros }}"
+__trustee_client_is_rh_distro: "{{ ansible_facts['distribution'] in __trustee_client_rh_distros }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone, or Fedora
-__trustee_attestation_client_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __trustee_attestation_client_rh_distros_fedora }}"
+__trustee_client_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __trustee_client_rh_distros_fedora }}"
 # END - DO NOT EDIT THIS BLOCK - rh distros variables

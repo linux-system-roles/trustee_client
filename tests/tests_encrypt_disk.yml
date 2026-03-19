@@ -3,13 +3,13 @@
 # NOTE: This test requires an unpartitioned block device of type "disk"
 # to be present on the target host (e.g. a second virtual disk in a VM).
 # The test skips automatically when no such device is found.
-- name: Ensure disk encryption works when trustee_attestation_client_encrypt_disk is enabled
+- name: Ensure disk encryption works when trustee_client_encrypt_disk is enabled
   hosts: all
   gather_facts: false
   vars:
-    trustee_attestation_client_trustee_gc: false
-    trustee_attestation_client_encrypt_disk: true
-    trustee_attestation_client_encrypt_disk_mount_point: /mnt/encrypted-disk
+    trustee_client_trustee_gc: false
+    trustee_client_encrypt_disk: true
+    trustee_client_encrypt_disk_mount_point: /mnt/encrypted-disk
   tasks:
     - name: Check for an unpartitioned disk device
       ansible.builtin.shell: |
@@ -34,14 +34,14 @@
       ansible.builtin.set_fact:
         __test_skip_encrypt_assertions: "{{ __test_unpartitioned_disk.stdout | trim == '' }}"
 
-    - name: Run trustee_attestation_client role with disk encryption enabled
+    - name: Run trustee_client role with disk encryption enabled
       ansible.builtin.include_role:
-        name: linux-system-roles.trustee_attestation_client
+        name: linux-system-roles.trustee_client
       when: not __test_skip_encrypt_assertions
 
     - name: Stat the encrypted disk mount point
       ansible.builtin.stat:
-        path: "{{ trustee_attestation_client_encrypt_disk_mount_point }}"
+        path: "{{ trustee_client_encrypt_disk_mount_point }}"
       register: __test_mount_point
       when: not __test_skip_encrypt_assertions
 
@@ -52,11 +52,11 @@
           - __test_mount_point.stat.isdir
         fail_msg: >-
           Encrypted disk mount point
-          {{ trustee_attestation_client_encrypt_disk_mount_point }} does not exist
+          {{ trustee_client_encrypt_disk_mount_point }} does not exist
       when: not __test_skip_encrypt_assertions
 
     - name: Get mount information
-      ansible.builtin.command: findmnt --noheadings --output SOURCE {{ trustee_attestation_client_encrypt_disk_mount_point }}
+      ansible.builtin.command: findmnt --noheadings --output SOURCE {{ trustee_client_encrypt_disk_mount_point }}
       register: __test_findmnt
       changed_when: false
       failed_when: false
@@ -68,7 +68,7 @@
           - __test_findmnt.rc == 0
           - __test_findmnt.stdout | trim != ""
         fail_msg: >-
-          Nothing is mounted at {{ trustee_attestation_client_encrypt_disk_mount_point }}
+          Nothing is mounted at {{ trustee_client_encrypt_disk_mount_point }}
       when: not __test_skip_encrypt_assertions
 
     - name: Assert the mounted device is the LUKS mapper device
@@ -79,7 +79,7 @@
             (__test_findmnt.stdout | trim)
         fail_msg: >-
           Expected /dev/mapper/encrypted-disk to be mounted at
-          {{ trustee_attestation_client_encrypt_disk_mount_point }} but found:
+          {{ trustee_client_encrypt_disk_mount_point }} but found:
           {{ __test_findmnt.stdout }}
       when: not __test_skip_encrypt_assertions
 
@@ -106,7 +106,7 @@
 
     - name: Stat podman storage directory on encrypted disk
       ansible.builtin.stat:
-        path: "{{ trustee_attestation_client_encrypt_disk_mount_point }}/containers-storage"
+        path: "{{ trustee_client_encrypt_disk_mount_point }}/containers-storage"
       register: __test_containers_storage
       when: not __test_skip_encrypt_assertions
 
@@ -117,7 +117,7 @@
           - __test_containers_storage.stat.isdir
         fail_msg: >-
           Podman storage directory
-          {{ trustee_attestation_client_encrypt_disk_mount_point }}/containers-storage
+          {{ trustee_client_encrypt_disk_mount_point }}/containers-storage
           was not created
       when: not __test_skip_encrypt_assertions
 
@@ -131,9 +131,9 @@
       ansible.builtin.assert:
         that:
           - >-
-            trustee_attestation_client_encrypt_disk_mount_point in
+            trustee_client_encrypt_disk_mount_point in
             (__test_storage_conf.content | b64decode)
         fail_msg: >-
           /etc/containers/storage.conf does not reference the encrypted
-          disk mount point {{ trustee_attestation_client_encrypt_disk_mount_point }}
+          disk mount point {{ trustee_client_encrypt_disk_mount_point }}
       when: not __test_skip_encrypt_assertions

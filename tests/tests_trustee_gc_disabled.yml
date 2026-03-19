@@ -4,22 +4,22 @@
 # assert the role did not add any quadlet files or create /etc/trustee-gc.
 # This works in batch mode when a previous test (e.g. tests_default) already
 # left quadlet files on the host.
-- name: Ensure role is a no-op when trustee_attestation_client_trustee_gc is disabled
+- name: Ensure role is a no-op when trustee_client_trustee_gc is disabled
   hosts: all
   gather_facts: false
   vars:
-    trustee_attestation_client_trustee_gc: false
-    trustee_attestation_client_encrypt_disk: false
-    trustee_attestation_client_quadlet_install_dir: "/etc/containers/systemd"
+    trustee_client_trustee_gc: false
+    trustee_client_encrypt_disk: false
+    trustee_client_quadlet_install_dir: "/etc/containers/systemd"
   tasks:
     - name: Stat quadlet install directory (before role)
       ansible.builtin.stat:
-        path: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        path: "{{ trustee_client_quadlet_install_dir }}"
       register: __test_quadlet_dir_before
 
     - name: Find quadlet files before role run
       ansible.builtin.find:
-        paths: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        paths: "{{ trustee_client_quadlet_install_dir }}"
         patterns:
           - "*.container"
           - "*.volume"
@@ -36,19 +36,19 @@
 
     - name: Run role with trustee_gc disabled
       ansible.builtin.include_role:
-        name: linux-system-roles.trustee_attestation_client
+        name: linux-system-roles.trustee_client
       vars:
-        trustee_attestation_client_trustee_gc: false
-        trustee_attestation_client_encrypt_disk: false
+        trustee_client_trustee_gc: false
+        trustee_client_encrypt_disk: false
 
     - name: Stat quadlet install directory (after role)
       ansible.builtin.stat:
-        path: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        path: "{{ trustee_client_quadlet_install_dir }}"
       register: __test_quadlet_dir_after
 
     - name: Find quadlet files after role run
       ansible.builtin.find:
-        paths: "{{ trustee_attestation_client_quadlet_install_dir }}"
+        paths: "{{ trustee_client_quadlet_install_dir }}"
         patterns:
           - "*.container"
           - "*.volume"
@@ -70,7 +70,7 @@
             (__test_quadlet_files_after.files | default([]) | map(attribute='path') | sort | list) ==
             (__test_quadlet_files_before.files | default([]) | map(attribute='path') | sort | list)
         fail_msg: >-
-          Role with trustee_attestation_client_trustee_gc false added or removed quadlet
+          Role with trustee_client_trustee_gc false added or removed quadlet
           files (expected no change)
 
     - name: Assert role did not create trustee-gc config directory
@@ -81,4 +81,4 @@
             __test_trustee_gc_dir_before.stat.exists
         fail_msg: >-
           Trustee GC config directory /etc/trustee-gc was created by the
-          role even though trustee_attestation_client_trustee_gc is false
+          role even though trustee_client_trustee_gc is false

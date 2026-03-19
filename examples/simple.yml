@@ -3,13 +3,13 @@
 - name: Deploy Trustee Guest Components using Podman Quadlets from GitHub repository
   hosts: all
   vars:
-    trustee_attestation_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-    trustee_attestation_client_quadlet_repo_path: "quadlet"
-    trustee_attestation_client_quadlet_repo_branch: "main"
-    trustee_attestation_client_quadlet_install_dir: "/etc/containers/systemd"
-    trustee_attestation_client_encrypt_disk: false
-    trustee_attestation_client_kbs_url: "https://kbs.example.com"
-    trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
-    trustee_attestation_client_secret_registration_enabled: false
+    trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+    trustee_client_quadlet_repo_path: "quadlet"
+    trustee_client_quadlet_repo_branch: "main"
+    trustee_client_quadlet_install_dir: "/etc/containers/systemd"
+    trustee_client_encrypt_disk: false
+    trustee_client_kbs_url: "https://kbs.example.com"
+    trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+    trustee_client_secret_registration_enabled: false
   roles:
-    - linux-system-roles.trustee_attestation_client
+    - linux-system-roles.trustee_client

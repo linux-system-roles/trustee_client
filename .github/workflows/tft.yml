@@ -181,7 +181,7 @@ jobs:
           tf_scope: private
           api_key: ${{ secrets.TF_API_KEY_RH }}
           update_pull_request_status: false
-          tmt_plan_filter: "tag:playbooks_parallel,trustee_attestation_client"
+          tmt_plan_filter: "tag:playbooks_parallel,trustee_client"
 
       - name: Set final commit status
         uses: myrotvorets/set-commit-status-action@master

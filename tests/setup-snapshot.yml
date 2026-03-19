@@ -4,11 +4,11 @@
   tasks:
     - name: Set platform/version specific variables
       include_role:
-        name: linux-system-roles.trustee_attestation_client
+        name: linux-system-roles.trustee_client
         tasks_from: set_vars.yml
         public: true
 
     - name: Install test packages
       package:
-        name: "{{ (__trustee_attestation_client_trustee_gc_packages | default([])) + (__trustee_attestation_client_encrypt_disk_packages | default([])) | unique }}"
+        name: "{{ (__trustee_client_trustee_gc_packages | default([])) + (__trustee_client_encrypt_disk_packages | default([])) | unique }}"
         state: present

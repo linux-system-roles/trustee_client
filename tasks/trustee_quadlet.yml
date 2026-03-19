@@ -1,34 +1,34 @@
 ---
 - name: Ensure required packages are installed
   ansible.builtin.package:
-    name: "{{ __trustee_attestation_client_trustee_gc_packages }}"
+    name: "{{ __trustee_client_trustee_gc_packages }}"
     state: present
-    use: "{{ (__trustee_attestation_client_is_ostree | d(false)) |
+    use: "{{ (__trustee_client_is_ostree | d(false)) |
           ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
 - name: Ensure quadlet install directory exists
   ansible.builtin.file:
-    path: "{{ trustee_attestation_client_quadlet_install_dir }}"
+    path: "{{ trustee_client_quadlet_install_dir }}"
     state: directory
     mode: "0755"
 
 - name: Create a temporary directory for the quadlet repository
   ansible.builtin.tempfile:
     state: directory
-  register: __trustee_attestation_client_quadlet_repo_dir
+  register: __trustee_client_quadlet_repo_dir
 
 - name: Download Trustee Guest Components quadlet files from GitHub repository
   ansible.builtin.git:
-    repo: "{{ trustee_attestation_client_quadlet_repo_url }}"
-    dest: "{{ __trustee_attestation_client_quadlet_repo_dir.path }}"
-    version: "{{ trustee_attestation_client_quadlet_repo_branch }}"
+    repo: "{{ trustee_client_quadlet_repo_url }}"
+    dest: "{{ __trustee_client_quadlet_repo_dir.path }}"
+    version: "{{ trustee_client_quadlet_repo_branch }}"
     depth: 1
     force: true
   register: quadlet_repo_download
 
 - name: Find Trustee Guest Components quadlet files in repository
   ansible.builtin.find:
-    paths: "{{ __trustee_attestation_client_quadlet_repo_dir.path }}/{{ trustee_attestation_client_quadlet_repo_path }}"
+    paths: "{{ __trustee_client_quadlet_repo_dir.path }}/{{ trustee_client_quadlet_repo_path }}"
     patterns:
       - "*.container"
       - "*.volume"
@@ -40,13 +40,13 @@
 
 - name: Fail if no Trustee Guest Components quadlet files found
   ansible.builtin.fail:
-    msg: "No quadlet files found in {{ trustee_attestation_client_quadlet_repo_url }}/{{ trustee_attestation_client_quadlet_repo_path }}"
+    msg: "No quadlet files found in {{ trustee_client_quadlet_repo_url }}/{{ trustee_client_quadlet_repo_path }}"
   when: quadlet_files_found.files | length == 0
 
 - name: Copy Trustee Guest Components quadlet files to install directory
   ansible.builtin.copy:
     src: "{{ item.path }}"
-    dest: "{{ trustee_attestation_client_quadlet_install_dir }}/{{ item.path | basename }}"
+    dest: "{{ trustee_client_quadlet_install_dir }}/{{ item.path | basename }}"
     mode: "0644"
     remote_src: true
     force: true
@@ -55,12 +55,12 @@
 
 - name: Stat repository configs directory
   ansible.builtin.stat:
-    path: "{{ __trustee_attestation_client_quadlet_repo_dir.path }}/configs"
+    path: "{{ __trustee_client_quadlet_repo_dir.path }}/configs"
   register: __repo_configs_dir
 
 - name: Copy Trustee Guest Components config files to /etc/trustee-gc/
   ansible.builtin.copy:
-    src: "{{ __trustee_attestation_client_quadlet_repo_dir.path }}/configs/"
+    src: "{{ __trustee_client_quadlet_repo_dir.path }}/configs/"
     dest: /etc/trustee-gc/
     mode: "0644"
     remote_src: true
@@ -75,19 +75,19 @@
   loop:
     - path: /etc/trustee-gc/cdh/config.toml
       regexp: KBS_URL
-      replace: "{{ trustee_attestation_client_kbs_url }}"
+      replace: "{{ trustee_client_kbs_url }}"
     - path: /etc/trustee-gc/cdh/config.toml
       regexp: KBS_CERT
-      replace: "{{ trustee_attestation_client_kbs_cert_content }}"
+      replace: "{{ trustee_client_kbs_cert_content }}"
     - path: /etc/trustee-gc/aa/config.toml
       regexp: KBS_URL
-      replace: "{{ trustee_attestation_client_kbs_url }}"
+      replace: "{{ trustee_client_kbs_url }}"
     - path: /etc/trustee-gc/aa/config.toml
       regexp: KBS_CERT
-      replace: "{{ trustee_attestation_client_kbs_cert_content }}"
+      replace: "{{ trustee_client_kbs_cert_content }}"
   when:
     - __repo_configs_dir.stat.exists
-    - trustee_attestation_client_kbs_url != "" or trustee_attestation_client_kbs_cert_content != ""
+    - trustee_client_kbs_url != "" or trustee_client_kbs_cert_content != ""
 
 - name: Stat /dev/sev-guest device
   ansible.builtin.stat:
@@ -96,14 +96,14 @@
 
 - name: Add /dev/sev-guest to trustee-gc-aa.container when device exists
   ansible.builtin.replace:
-    path: "{{ trustee_attestation_client_quadlet_install_dir }}/trustee-gc-aa.container"
+    path: "{{ trustee_client_quadlet_install_dir }}/trustee-gc-aa.container"
     regexp: '^#AddDevice=/dev/sev-guest'
     replace: 'AddDevice=/dev/sev-guest'
   when: __sev_guest_device.stat.exists
 
 - name: Get the installed Trustee Guest Components pod name
   ansible.builtin.find:
-    paths: "{{ trustee_attestation_client_quadlet_install_dir }}"
+    paths: "{{ trustee_client_quadlet_install_dir }}"
     patterns: "*.pod"
   register: trustee_gc_pod_name
 
@@ -118,12 +118,12 @@
 
 - name: Write KBS certificate to /etc/trustee-gc/server.crt
   ansible.builtin.copy:
-    content: "{{ trustee_attestation_client_kbs_cert_content }}"
+    content: "{{ trustee_client_kbs_cert_content }}"
     dest: /etc/trustee-gc/server.crt
     mode: "0644"
-  when: trustee_attestation_client_kbs_cert_content | length > 0
+  when: trustee_client_kbs_cert_content | length > 0
 
 - name: Clean up temporary repository directory
   ansible.builtin.file:
-    path: "{{ __trustee_attestation_client_quadlet_repo_dir.path }}"
+    path: "{{ __trustee_client_quadlet_repo_dir.path }}"
     state: absent

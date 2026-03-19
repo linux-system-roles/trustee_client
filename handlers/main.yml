@@ -10,5 +10,5 @@
     name: "{{ item }}"
     enabled: true
     state: restarted
-  loop: "{{ __trustee_attestation_client_services | default([]) }}"
+  loop: "{{ __trustee_client_services | default([]) }}"
   listen: "restart trustee services"
