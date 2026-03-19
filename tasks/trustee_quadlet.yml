@@ -67,6 +67,12 @@
     force: true
   when: __repo_configs_dir.stat.exists
 
+- name: Set KBS cert content from path or explicit content
+  ansible.builtin.set_fact:
+    __trustee_client_kbs_cert_content: "{{ trustee_client_kbs_cert_content if (trustee_client_kbs_cert_content != '') else (lookup('file', trustee_client_kbs_cert) if (trustee_client_kbs_cert != '') else '') }}"
+  when: __repo_configs_dir.stat.exists
+    - trustee_client_kbs_cert_content != "" or trustee_client_kbs_cert != ""
+
 - name: Replace KBS_URL and KBS_CERT in config.toml files
   ansible.builtin.replace:
     path: "{{ item.path }}"
@@ -78,16 +84,16 @@
       replace: "{{ trustee_client_kbs_url }}"
     - path: /etc/trustee-gc/cdh/config.toml
       regexp: KBS_CERT
-      replace: "{{ trustee_client_kbs_cert_content }}"
+      replace: "{{ __trustee_client_kbs_cert_content }}"
     - path: /etc/trustee-gc/aa/config.toml
       regexp: KBS_URL
       replace: "{{ trustee_client_kbs_url }}"
     - path: /etc/trustee-gc/aa/config.toml
       regexp: KBS_CERT
-      replace: "{{ trustee_client_kbs_cert_content }}"
+      replace: "{{ __trustee_client_kbs_cert_content }}"
   when:
     - __repo_configs_dir.stat.exists
-    - trustee_client_kbs_url != "" or trustee_client_kbs_cert_content != ""
+    - trustee_client_kbs_url != "" or __trustee_client_kbs_cert_content != ""
 
 - name: Stat /dev/sev-guest device
   ansible.builtin.stat:
@@ -118,10 +124,10 @@
 
 - name: Write KBS certificate to /etc/trustee-gc/server.crt
   ansible.builtin.copy:
-    content: "{{ trustee_client_kbs_cert_content }}"
+    content: "{{ __trustee_client_kbs_cert_content }}"
     dest: /etc/trustee-gc/server.crt
     mode: "0644"
-  when: trustee_client_kbs_cert_content | length > 0
+  when: __trustee_client_kbs_cert_content | length > 0
 
 - name: Clean up temporary repository directory
   ansible.builtin.file:
