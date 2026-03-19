@@ -24,7 +24,7 @@ trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadl
 trustee_client_quadlet_repo_path: "quadlet"
 trustee_client_quadlet_repo_branch: "main"
 trustee_client_kbs_url: "https://kbs.example.com"
-trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"  # or trustee_client_kbs_cert: "/path/to/server.crt"
 trustee_client_secret_registration_enabled: true
 trustee_client_encrypt_disk: true
 ```

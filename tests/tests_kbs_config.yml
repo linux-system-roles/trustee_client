@@ -94,3 +94,80 @@
       assert:
         that: __test_kbs_cert.stat.exists
         fail_msg: "KBS certificate /etc/trustee-gc/server.crt was not written"
+
+- name: Ensure KBS certificate from path is configured in trustee-gc config files
+  hosts: all
+  gather_facts: false
+  vars:
+    trustee_client_trustee_gc: true
+    trustee_client_encrypt_disk: false
+    trustee_client_kbs_url: "https://kbs.example.com:8080"
+    trustee_client_kbs_cert_content: ""
+    __test_cert_content: "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkq\n-----END CERTIFICATE-----"
+  tasks:
+    - name: Create cert file on control node for path test
+      ansible.builtin.copy:
+        content: "{{ __test_cert_content }}"
+        dest: "{{ playbook_dir }}/kbs_test_cert.crt"
+      run_once: true
+      delegate_to: localhost
+
+    - name: Run trustee_client role with KBS cert from path
+      ansible.builtin.include_role:
+        name: linux-system-roles.trustee_client
+      vars:
+        trustee_client_kbs_cert: "{{ playbook_dir }}/kbs_test_cert.crt"
+
+    - name: Stat CDH config file
+      ansible.builtin.stat:
+        path: /etc/trustee-gc/cdh/config.toml
+      register: __test_cdh_config
+
+    - name: Verify CDH config contains KBS URL and cert content
+      when: __test_cdh_config.stat.exists
+      block:
+        - name: Read CDH config file
+          ansible.builtin.slurp:
+            src: /etc/trustee-gc/cdh/config.toml
+          register: __test_cdh_content
+
+        - name: Assert CDH config contains the KBS URL
+          ansible.builtin.assert:
+            that:
+              - >-
+                trustee_client_kbs_url in
+                (__test_cdh_content.content | b64decode)
+            fail_msg: >-
+              KBS URL '{{ trustee_client_kbs_url }}' not found in
+              /etc/trustee-gc/cdh/config.toml
+
+        - name: Assert CDH config contains cert content from path
+          ansible.builtin.assert:
+            that:
+              - >-
+                'MIIBIjANBgkq' in (__test_cdh_content.content | b64decode)
+            fail_msg: >-
+              KBS cert content from path not found in
+              /etc/trustee-gc/cdh/config.toml
+
+    - name: Stat KBS certificate file
+      ansible.builtin.stat:
+        path: /etc/trustee-gc/server.crt
+      register: __test_kbs_cert
+
+    - name: Assert KBS certificate was written from path
+      ansible.builtin.assert:
+        that: __test_kbs_cert.stat.exists
+        fail_msg: "KBS certificate /etc/trustee-gc/server.crt was not written from path"
+
+    - name: Assert server.crt contains expected cert content
+      ansible.builtin.slurp:
+        src: /etc/trustee-gc/server.crt
+      register: __test_server_crt_content
+
+    - name: Verify server.crt content matches cert from path
+      ansible.builtin.assert:
+        that:
+          - >-
+            __test_cert_content in (__test_server_crt_content.content | b64decode)
+        fail_msg: "KBS certificate /etc/trustee-gc/server.crt content does not match cert from path"

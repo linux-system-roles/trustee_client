@@ -3,6 +3,7 @@ vault.yml
 *.pyc
 *.retry
 /tests/.coverage
+/tests/kbs_test_cert.crt
 /tests/htmlcov*
 /.tox
 /venv*/

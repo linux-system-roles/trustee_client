@@ -9,7 +9,9 @@
     trustee_client_quadlet_install_dir: "/etc/containers/systemd"
     trustee_client_encrypt_disk: false
     trustee_client_kbs_url: "https://kbs.example.com"
+    # Use either cert content or path to cert file:
     trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+    # trustee_client_kbs_cert: "/path/to/server.crt"
     trustee_client_secret_registration_enabled: false
   roles:
     - linux-system-roles.trustee_client
