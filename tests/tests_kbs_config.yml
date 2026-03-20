@@ -2,15 +2,18 @@
 ---
 - name: Ensure KBS URL and certificate are configured in trustee-gc config files
   hosts: all
-  gather_facts: false
   vars:
     trustee_attestation_client_trustee_gc: true
     trustee_attestation_client_encrypt_disk: false
     trustee_attestation_client_kbs_url: "https://kbs.example.com:8080"
     trustee_attestation_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\nMIIBIjANBgkq\n-----END CERTIFICATE-----"
-  roles:
-    - linux-system-roles.trustee_attestation_client
   tasks:
+    - name: Run the role
+      ansible.builtin.include_tasks:
+        file: tasks/run_role_with_clear_facts.yml
+      vars:
+        __sr_public: true
+
     - name: Stat CDH config file
       stat:
         path: /etc/trustee-gc/cdh/config.toml
