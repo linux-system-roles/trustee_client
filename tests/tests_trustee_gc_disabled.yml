@@ -6,7 +6,6 @@
 # left quadlet files on the host.
 - name: Ensure role is a no-op when trustee_client_trustee_gc is disabled
   hosts: all
-  gather_facts: false
   vars:
     trustee_client_trustee_gc: false
     trustee_client_encrypt_disk: false
@@ -35,8 +34,8 @@
       register: __test_trustee_gc_dir_before
 
     - name: Run role with trustee_gc disabled
-      ansible.builtin.include_role:
-        name: linux-system-roles.trustee_client
+      ansible.builtin.include_tasks:
+        file: tasks/run_role_with_clear_facts.yml
       vars:
         trustee_client_trustee_gc: false
         trustee_client_encrypt_disk: false

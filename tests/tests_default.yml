@@ -2,13 +2,16 @@
 ---
 - name: Ensure that the role runs with default parameters
   hosts: all
-  gather_facts: false  # test that role works without pre-gathered facts
   vars:
     trustee_client_trustee_gc: true
     trustee_client_encrypt_disk: false
-  roles:
-    - linux-system-roles.trustee_client
   tasks:
+    - name: Run the role
+      ansible.builtin.include_tasks:
+        file: tasks/run_role_with_clear_facts.yml
+      vars:
+        __sr_public: true
+
     - name: Collect package facts
       package_facts:
         manager: auto
