@@ -5,7 +5,6 @@
 # The test skips automatically when no such device is found.
 - name: Ensure disk encryption works when trustee_client_encrypt_disk is enabled
   hosts: all
-  gather_facts: false
   vars:
     trustee_client_trustee_gc: false
     trustee_client_encrypt_disk: true
@@ -35,8 +34,8 @@
         __test_skip_encrypt_assertions: "{{ __test_unpartitioned_disk.stdout | trim == '' }}"
 
     - name: Run trustee_client role with disk encryption enabled
-      ansible.builtin.include_role:
-        name: linux-system-roles.trustee_client
+      ansible.builtin.include_tasks:
+        file: tasks/run_role_with_clear_facts.yml
       when: not __test_skip_encrypt_assertions
 
     - name: Stat the encrypted disk mount point
@@ -140,7 +139,6 @@
 
 - name: Ensure disk encryption works with systemd-cryptenroll when secret_registration_client is disabled
   hosts: all
-  gather_facts: false
   vars:
     trustee_client_trustee_gc: false
     trustee_client_encrypt_disk: true
