@@ -3,10 +3,6 @@
 - name: Deploy Trustee Guest Components using Podman Quadlets from GitHub repository
   hosts: all
   vars:
-    trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-    trustee_client_quadlet_repo_path: "quadlet"
-    trustee_client_quadlet_repo_branch: "main"
-    trustee_client_quadlet_install_dir: "/etc/containers/systemd"
     trustee_client_encrypt_disk: false
     trustee_client_kbs_url: "https://kbs.example.com"
     # Use either cert content or path to cert file:

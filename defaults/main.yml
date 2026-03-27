@@ -3,12 +3,8 @@
 # Here is the right place to put the role's input variables.
 # This file also serves as a documentation for such a variables.
 
-# Trustee Guest Components Quadlet repository configuration
+# Trustee Guest Components Quadlet (see vars/main.yml for quadlet repo defaults)
 trustee_client_trustee_gc: true
-trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-trustee_client_quadlet_repo_path: "quadlet"
-trustee_client_quadlet_repo_branch: "main"
-trustee_client_quadlet_install_dir: "/etc/containers/systemd"
 
 # Trustee KBS configuration
 trustee_client_kbs_url: ""
