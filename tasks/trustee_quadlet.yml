@@ -8,7 +8,7 @@
 
 - name: Ensure quadlet install directory exists
   ansible.builtin.file:
-    path: "{{ trustee_client_quadlet_install_dir }}"
+    path: "{{ __trustee_client_quadlet_install_dir }}"
     state: directory
     mode: "0755"
 
@@ -19,16 +19,16 @@
 
 - name: Download Trustee Guest Components quadlet files from GitHub repository
   ansible.builtin.git:
-    repo: "{{ trustee_client_quadlet_repo_url }}"
+    repo: "{{ __trustee_client_quadlet_repo_url }}"
     dest: "{{ __trustee_client_quadlet_repo_dir.path }}"
-    version: "{{ trustee_client_quadlet_repo_branch }}"
+    version: "{{ __trustee_client_quadlet_repo_branch }}"
     depth: 1
     force: true
   register: quadlet_repo_download
 
 - name: Find Trustee Guest Components quadlet files in repository
   ansible.builtin.find:
-    paths: "{{ __trustee_client_quadlet_repo_dir.path }}/{{ trustee_client_quadlet_repo_path }}"
+    paths: "{{ __trustee_client_quadlet_repo_dir.path }}/{{ __trustee_client_quadlet_repo_path }}"
     patterns:
       - "*.container"
       - "*.volume"
@@ -40,13 +40,13 @@
 
 - name: Fail if no Trustee Guest Components quadlet files found
   ansible.builtin.fail:
-    msg: "No quadlet files found in {{ trustee_client_quadlet_repo_url }}/{{ trustee_client_quadlet_repo_path }}"
+    msg: "No quadlet files found in {{ __trustee_client_quadlet_repo_url }}/{{ __trustee_client_quadlet_repo_path }}"
   when: quadlet_files_found.files | length == 0
 
 - name: Copy Trustee Guest Components quadlet files to install directory
   ansible.builtin.copy:
     src: "{{ item.path }}"
-    dest: "{{ trustee_client_quadlet_install_dir }}/{{ item.path | basename }}"
+    dest: "{{ __trustee_client_quadlet_install_dir }}/{{ item.path | basename }}"
     mode: "0644"
     remote_src: true
     force: true
@@ -106,14 +106,14 @@
 
 - name: Add /dev/sev-guest to trustee-gc-aa.container when device exists
   ansible.builtin.replace:
-    path: "{{ trustee_client_quadlet_install_dir }}/trustee-gc-aa.container"
+    path: "{{ __trustee_client_quadlet_install_dir }}/trustee-gc-aa.container"
     regexp: '^#AddDevice=/dev/sev-guest'
     replace: 'AddDevice=/dev/sev-guest'
   when: __sev_guest_device.stat.exists
 
 - name: Get the installed Trustee Guest Components pod name
   ansible.builtin.find:
-    paths: "{{ trustee_client_quadlet_install_dir }}"
+    paths: "{{ __trustee_client_quadlet_install_dir }}"
     patterns: "*.pod"
   register: trustee_gc_pod_name
 

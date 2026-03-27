@@ -5,6 +5,10 @@
 # value in a platform/version specific file in vars/
 
 # Examples of non-distribution specific (generic) internal variables:
+__trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
+__trustee_client_quadlet_repo_path: "quadlet"
+__trustee_client_quadlet_repo_branch: "main"
+__trustee_client_quadlet_install_dir: "/etc/containers/systemd"
 __trustee_client_foo_config: foo.conf
 __trustee_client_trustee_gc_packages:
   - podman

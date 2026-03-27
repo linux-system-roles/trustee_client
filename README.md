@@ -20,9 +20,6 @@ storage devices.
 Example of setting the variables:
 
 ```yaml
-trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-trustee_client_quadlet_repo_path: "quadlet"
-trustee_client_quadlet_repo_branch: "main"
 trustee_client_kbs_url: "https://kbs.example.com"
 trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"  # or trustee_client_kbs_cert_src: "/path/to/server.crt"
 trustee_client_secret_registration_enabled: true
@@ -38,9 +35,6 @@ passed in as parameters) is always nice for users too:
 - name: Deploy Trustee Guest Components using Podman Quadlets
   hosts: all
   vars:
-    trustee_client_quadlet_repo_url: "https://github.com/litian1992/trustee-gc-quadlet-rhel"
-    trustee_client_quadlet_repo_path: "quadlet"
-    trustee_client_quadlet_repo_branch: "main"
     trustee_client_kbs_url: "https://kbs.example.com"
     trustee_client_kbs_cert_content: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
     trustee_client_secret_registration_enabled: true

@@ -10,16 +10,16 @@
   vars:
     trustee_client_trustee_gc: false
     trustee_client_encrypt_disk: false
-    trustee_client_quadlet_install_dir: "/etc/containers/systemd"
+    __trustee_client_quadlet_install_dir: "/etc/containers/systemd"
   tasks:
     - name: Stat quadlet install directory (before role)
       ansible.builtin.stat:
-        path: "{{ trustee_client_quadlet_install_dir }}"
+        path: "{{ __trustee_client_quadlet_install_dir }}"
       register: __test_quadlet_dir_before
 
     - name: Find quadlet files before role run
       ansible.builtin.find:
-        paths: "{{ trustee_client_quadlet_install_dir }}"
+        paths: "{{ __trustee_client_quadlet_install_dir }}"
         patterns:
           - "*.container"
           - "*.volume"
@@ -43,12 +43,12 @@
 
     - name: Stat quadlet install directory (after role)
       ansible.builtin.stat:
-        path: "{{ trustee_client_quadlet_install_dir }}"
+        path: "{{ __trustee_client_quadlet_install_dir }}"
       register: __test_quadlet_dir_after
 
     - name: Find quadlet files after role run
       ansible.builtin.find:
-        paths: "{{ trustee_client_quadlet_install_dir }}"
+        paths: "{{ __trustee_client_quadlet_install_dir }}"
         patterns:
           - "*.container"
           - "*.volume"
