@@ -1,4 +1,4 @@
-# Contributing to the trustee_attestation_client Linux System Role
+# Contributing to the trustee_client Linux System Role
 
 ## Where to start
 
@@ -12,12 +12,12 @@ This has all of the common information that all role developers need:
 * How to create git commits and submit pull requests
 
 **Bugs and needed implementations** are listed on
-[Github Issues](https://github.com/linux-system-roles/trustee_attestation_client/issues).
+[Github Issues](https://github.com/linux-system-roles/trustee_client/issues).
 Issues labeled with
-[**help wanted**](https://github.com/linux-system-roles/trustee_attestation_client/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+[**help wanted**](https://github.com/linux-system-roles/trustee_client/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 are likely to be suitable for new contributors!
 
-**Code** is managed on [Github](https://github.com/linux-system-roles/trustee_attestation_client), using
+**Code** is managed on [Github](https://github.com/linux-system-roles/trustee_client), using
 [Pull Requests](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests).
 
 ## Running CI Tests Locally
