@@ -113,7 +113,7 @@
             path: "{{ trustee_client_encrypt_disk_mount_point }}"
             src: /dev/mapper/trustee_client_encrypted_disk_0
             fstype: ext4
-            opts: defaults,x-systemd.requires=systemd-cryptsetup@trustee_client_encrypted_disk0.service
+            opts: defaults,x-systemd.requires=systemd-cryptsetup@trustee_client_encrypted_disk_0.service
             state: mounted
 
     - name: Clean up disk encryption key file
