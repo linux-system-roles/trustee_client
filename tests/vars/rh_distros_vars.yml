@@ -4,17 +4,17 @@
 # file is playbooks/templates/tests/vars/rh_distros_vars.yml
 ---
 # Ansible distribution identifiers that the role treats like RHEL
-__trustee_attestation_client_rh_distros:
+__trustee_client_rh_distros:
   - AlmaLinux
   - CentOS
   - RedHat
   - Rocky
 
 # Same as above but includes Fedora
-__trustee_attestation_client_rh_distros_fedora: "{{ __trustee_attestation_client_rh_distros + ['Fedora'] }}"
+__trustee_client_rh_distros_fedora: "{{ __trustee_client_rh_distros + ['Fedora'] }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone
-__trustee_attestation_client_is_rh_distro: "{{ ansible_facts['distribution'] in __trustee_attestation_client_rh_distros }}"
+__trustee_client_is_rh_distro: "{{ ansible_facts['distribution'] in __trustee_client_rh_distros }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone, or Fedora
-__trustee_attestation_client_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __trustee_attestation_client_rh_distros_fedora }}"
+__trustee_client_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __trustee_client_rh_distros_fedora }}"
