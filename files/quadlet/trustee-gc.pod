@@ -1,0 +1,10 @@
+[Unit]
+Description=Trustee Guest Components Pod
+After=network.target
+
+[Pod]
+PodName=trustee-gc
+Network=host
+# Shared Volume definitions
+Volume=cdh-sock:/run/confidential-containers:Z
+Volume=aa-sock:/run/confidential-containers/attestation-agent:Z

@@ -1,0 +1,31 @@
+# Trustee API Server Rest (ASR)
+
+[Unit]
+Description=Trustee API Server Rest service
+
+After=network-online.target trustee-gc-cdh.service
+Wants=network-online.target
+Requires=trustee-gc-cdh.service
+
+[Container]
+Image=quay.io/linux-system-roles/trustee-gc-asr:0.15.0
+Pod=trustee-gc.pod
+ContainerName=trustee-gc-asr
+Environment=RUST_LOG=info
+
+[Service]
+# Restart policy
+Restart=on-failure
+RestartSec=10s
+
+# Startup/shutdown timeouts
+TimeoutStartSec=30s
+TimeoutStopSec=10s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=trustee-gc-asr
+
+[Install]
+WantedBy=multi-user.target default.target
