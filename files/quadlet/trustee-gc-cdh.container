@@ -1,0 +1,32 @@
+# Trustee Confidential Data Hub (CDH)
+
+[Unit]
+Description=Trustee Confidential Data Hub service
+
+After=network-online.target trustee-gc-aa.service
+Wants=network-online.target
+Requires=trustee-gc-aa.service
+
+[Container]
+Image=quay.io/linux-system-roles/trustee-gc-cdh:0.15.0
+Pod=trustee-gc.pod
+ContainerName=trustee-gc-cdh
+Volume=/etc/trustee-gc/cdh:/etc/cdh:ro,Z
+Environment=RUST_LOG=info
+
+[Service]
+# Restart policy
+Restart=on-failure
+RestartSec=10s
+
+# Startup/shutdown timeouts
+TimeoutStartSec=30s
+TimeoutStopSec=10s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=trustee-gc-cdh
+
+[Install]
+WantedBy=multi-user.target default.target

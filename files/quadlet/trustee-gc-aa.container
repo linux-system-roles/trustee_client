@@ -1,0 +1,33 @@
+# Trustee Attestation Agent (AA)
+
+[Unit]
+Description=Trustee Attestation Agent service
+
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=quay.io/linux-system-roles/trustee-gc-aa:0.15.0
+Pod=trustee-gc.pod
+ContainerName=trustee-gc-aa
+Volume=/etc/trustee-gc/aa:/etc/aa:ro,Z
+#AddDevice=/dev/sev-guest
+AddDevice=/dev/tpm0
+Environment=RUST_LOG=info
+
+[Service]
+# Restart policy
+Restart=on-failure
+RestartSec=10s
+
+# Startup/shutdown timeouts
+TimeoutStartSec=30s
+TimeoutStopSec=10s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=trustee-gc-aa
+
+[Install]
+WantedBy=multi-user.target default.target

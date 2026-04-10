@@ -17,6 +17,3 @@
   include_tasks: encrypt_disk.yml
   when:
     - trustee_client_encrypt_disk | bool
-
-- name: Flush handlers to ensure services are started
-  ansible.builtin.meta: flush_handlers
