@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Stat quadlet install directory for cleanup
+  ansible.builtin.stat:
+    path: "{{ __trustee_client_quadlet_install_dir }}"
+  register: __trustee_client_cleanup_quadlet_dir
+
+- name: Find trustee-gc quadlet pod files
+  ansible.builtin.find:
+    paths: "{{ __trustee_client_quadlet_install_dir }}"
+    patterns: trustee-gc*.pod
+  register: __trustee_client_cleanup_pod_files
+  when: __trustee_client_cleanup_quadlet_dir.stat.exists
+
+- name: Stop and disable trustee quadlet pod services
+  ansible.builtin.systemd:
+    name: "{{ item.path | basename | regex_replace('\\.pod$', '') }}-pod.service"
+    state: stopped
+    enabled: false
+  loop: >-
+    {{
+      (__trustee_client_cleanup_pod_files.files | default([]))
+      if not (__trustee_client_cleanup_pod_files is skipped)
+      else []
+    }}
+  failed_when: false
+
+- name: Stop and disable services tracked by trustee_client role
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop: "{{ __trustee_client_services }}"
+  failed_when: false
+
+- name: Find trustee-gc quadlet unit files to remove
+  ansible.builtin.find:
+    paths: "{{ __trustee_client_quadlet_install_dir }}"
+    patterns:
+      - trustee-gc*.container
+      - trustee-gc*.pod
+      - trustee-gc*.volume
+  register: __trustee_client_cleanup_quadlet_files
+  when: __trustee_client_cleanup_quadlet_dir.stat.exists
+
+- name: Remove trustee-gc quadlet unit files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: >-
+    {{
+      (__trustee_client_cleanup_quadlet_files.files | default([]))
+      if not (__trustee_client_cleanup_quadlet_files is skipped)
+      else []
+    }}
+
+- name: Remove trustee-gc configuration directory
+  ansible.builtin.file:
+    path: /etc/trustee-gc
+    state: absent
+
+- name: Remove secret registration client script
+  ansible.builtin.file:
+    path: /usr/local/bin/secret_registration_client.sh
+    state: absent
+
+- name: Remove secret registration client systemd unit
+  ansible.builtin.file:
+    path: /etc/systemd/system/secret_registration_client.service
+    state: absent
+
+- name: Reload systemd after removing trustee_client units
+  ansible.builtin.systemd:
+    daemon_reload: true
