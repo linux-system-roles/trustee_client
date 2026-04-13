@@ -11,73 +11,85 @@
     trustee_client_encrypt_disk: false
     __trustee_client_quadlet_install_dir: "/etc/containers/systemd"
   tasks:
-    - name: Stat quadlet install directory (before role)
-      ansible.builtin.stat:
-        path: "{{ __trustee_client_quadlet_install_dir }}"
-      register: __test_quadlet_dir_before
+    - name: Run the tests
+      block:
+        - name: Stat quadlet install directory (before role)
+          ansible.builtin.stat:
+            path: "{{ __trustee_client_quadlet_install_dir }}"
+          register: __test_quadlet_dir_before
 
-    - name: Find quadlet files before role run
-      ansible.builtin.find:
-        paths: "{{ __trustee_client_quadlet_install_dir }}"
-        patterns:
-          - "*.container"
-          - "*.volume"
-          - "*.network"
-          - "*.kube"
-          - "*.pod"
-      register: __test_quadlet_files_before
-      when: __test_quadlet_dir_before.stat.exists
+        - name: Find quadlet files before role run
+          ansible.builtin.find:
+            paths: "{{ __trustee_client_quadlet_install_dir }}"
+            patterns:
+              - "*.container"
+              - "*.volume"
+              - "*.network"
+              - "*.kube"
+              - "*.pod"
+          register: __test_quadlet_files_before
+          when: __test_quadlet_dir_before.stat.exists
 
-    - name: Stat trustee-gc config directory (before role)
-      ansible.builtin.stat:
-        path: /etc/trustee-gc
-      register: __test_trustee_gc_dir_before
+        - name: Stat trustee-gc config directory (before role)
+          ansible.builtin.stat:
+            path: /etc/trustee-gc
+          register: __test_trustee_gc_dir_before
 
-    - name: Run role with trustee_gc disabled
-      ansible.builtin.include_tasks:
-        file: tasks/run_role_with_clear_facts.yml
-      vars:
-        trustee_client_trustee_gc: false
-        trustee_client_encrypt_disk: false
+        - name: Run role with trustee_gc disabled
+          ansible.builtin.include_tasks:
+            file: tasks/run_role_with_clear_facts.yml
+          vars:
+            __sr_public: true
+            trustee_client_trustee_gc: false
+            trustee_client_encrypt_disk: false
 
-    - name: Stat quadlet install directory (after role)
-      ansible.builtin.stat:
-        path: "{{ __trustee_client_quadlet_install_dir }}"
-      register: __test_quadlet_dir_after
+        - name: Flush handlers to start services created by the role
+          ansible.builtin.meta: flush_handlers
 
-    - name: Find quadlet files after role run
-      ansible.builtin.find:
-        paths: "{{ __trustee_client_quadlet_install_dir }}"
-        patterns:
-          - "*.container"
-          - "*.volume"
-          - "*.network"
-          - "*.kube"
-          - "*.pod"
-      register: __test_quadlet_files_after
-      when: __test_quadlet_dir_after.stat.exists
+        - name: Stat quadlet install directory (after role)
+          ansible.builtin.stat:
+            path: "{{ __trustee_client_quadlet_install_dir }}"
+          register: __test_quadlet_dir_after
 
-    - name: Stat trustee-gc config directory (after role)
-      ansible.builtin.stat:
-        path: /etc/trustee-gc
-      register: __test_trustee_gc_dir_after
+        - name: Find quadlet files after role run
+          ansible.builtin.find:
+            paths: "{{ __trustee_client_quadlet_install_dir }}"
+            patterns:
+              - "*.container"
+              - "*.volume"
+              - "*.network"
+              - "*.kube"
+              - "*.pod"
+          register: __test_quadlet_files_after
+          when: __test_quadlet_dir_after.stat.exists
 
-    - name: Assert role did not add any quadlet files
-      ansible.builtin.assert:
-        that:
-          - >-
-            (__test_quadlet_files_after.files | default([]) | map(attribute='path') | sort | list) ==
-            (__test_quadlet_files_before.files | default([]) | map(attribute='path') | sort | list)
-        fail_msg: >-
-          Role with trustee_client_trustee_gc false added or removed quadlet
-          files (expected no change)
+        - name: Stat trustee-gc config directory (after role)
+          ansible.builtin.stat:
+            path: /etc/trustee-gc
+          register: __test_trustee_gc_dir_after
 
-    - name: Assert role did not create trustee-gc config directory
-      ansible.builtin.assert:
-        that:
-          - >-
-            (not __test_trustee_gc_dir_after.stat.exists) or
-            __test_trustee_gc_dir_before.stat.exists
-        fail_msg: >-
-          Trustee GC config directory /etc/trustee-gc was created by the
-          role even though trustee_client_trustee_gc is false
+        - name: Assert role did not add any quadlet files
+          ansible.builtin.assert:
+            that:
+              - >-
+                (__test_quadlet_files_after.files | default([]) | map(attribute='path') | sort | list) ==
+                (__test_quadlet_files_before.files | default([]) | map(attribute='path') | sort | list)
+            fail_msg: >-
+              Role with trustee_client_trustee_gc false added or removed quadlet
+              files (expected no change)
+
+        - name: Assert role did not create trustee-gc config directory
+          ansible.builtin.assert:
+            that:
+              - >-
+                (not __test_trustee_gc_dir_after.stat.exists) or
+                __test_trustee_gc_dir_before.stat.exists
+            fail_msg: >-
+              Trustee GC config directory /etc/trustee-gc was created by the
+              role even though trustee_client_trustee_gc is false
+      always:
+        - name: Cleanup trustee_client test resources
+          ansible.builtin.include_tasks:
+            file: tasks/cleanup.yml
+          tags:
+            - tests::cleanup
