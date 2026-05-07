@@ -26,6 +26,108 @@ trustee_client_secret_registration_enabled: true
 trustee_client_encrypt_disk: true
 ```
 
+## Variables
+
+### trustee_client_trustee_gc
+
+Whether to deploy Trustee Guest Components using Podman Quadlets (packages,
+quadlet files, `/etc/trustee-gc/` configuration, and the `trustee-gc` pod
+service). When `false`, this part of the role is skipped.
+
+The secret registration client is only deployed when this variable and
+`trustee_client_secret_registration_enabled` are both `true`.
+
+Default: `true`
+
+Type: `bool`
+
+### trustee_client_kbs_url
+
+URL of the Key Broker Service (KBS) used by Trustee Guest Components. When
+non-empty, the role replaces the `KBS_URL` placeholder in the Attestation Agent
+and Confidential Data Hub `config.toml` files under `/etc/trustee-gc/` with
+this value.
+
+If unset (empty string), the bundled placeholder values in those files are left
+unchanged.
+
+Default: `""`
+
+Type: `string`
+
+### trustee_client_kbs_cert_content
+
+PEM-encoded TLS certificate for the KBS server, as a string (for example from
+Ansible Vault). When non-empty, the role replaces the `KBS_CERT` placeholder in
+the AA and CDH `config.toml` files and writes the certificate to
+`/etc/trustee-gc/server.crt`.
+
+Use either this variable or `trustee_client_kbs_cert_src`, not both as the
+primary source; if both are set, explicit content takes precedence when it is
+non-empty.
+
+Default: `""`
+
+Type: `string`
+
+### trustee_client_kbs_cert_src
+
+Path on the control node to a PEM certificate file for the KBS server. Used
+when `trustee_client_kbs_cert_content` is empty. The file is read with
+`lookup('file', ...)` and applied like `trustee_client_kbs_cert_content`.
+
+Default: `""`
+
+Type: `string`
+
+### trustee_client_secret_registration_enabled
+
+Whether to install and configure the secret registration client (requires
+Trustee Guest Components; see `trustee_client_trustee_gc`). When `true`, the
+client can register with the Secret Registration Server and supply disk
+encryption keys when encrypt-disk features use it.
+
+Default: `false`
+
+Type: `bool`
+
+### trustee_client_encrypt_disk
+
+Whether to locate an unpartitioned disk, create a LUKS2 encrypted volume, and
+mount it. The encryption key comes from the secret registration client when
+`trustee_client_secret_registration_enabled` is `true`, otherwise from a
+generated key and TPM binding via `systemd-cryptenroll` (PCR 7).
+
+Default: `false`
+
+Type: `bool`
+
+### trustee_client_encrypt_disk_mount_point
+
+Filesystem path where the encrypted disk (mapper device
+`trustee_client_encrypted_disk_0`) is mounted when
+`trustee_client_encrypt_disk` is `true`. The directory is created if missing.
+
+Default: `"/mnt/encrypted-disk"`
+
+Type: `string`
+
+### trustee_client_secure_logging
+
+If `true`, suppress potentially sensitive output from tasks that handle
+credentials, secrets, and other sensitive data by setting `no_log: true` on
+those tasks. This prevents passwords, API tokens, private keys, and similar
+sensitive information from appearing in Ansible logs and console output.
+
+If you need to debug issues with credential handling or secret management, you
+can temporarily set `trustee_client_secure_logging: false` to see the full output from
+these tasks. However, be aware that this may expose sensitive information in
+logs, so it should only be used in development or troubleshooting scenarios.
+
+Default: `true`
+
+Type: `bool`
+
 ## Example Playbook
 
 Including an example of how to use your role (for instance, with variables
@@ -68,22 +170,6 @@ An unpartitioned empty disk must be attached to the target. When enabled, this t
   b. `systemd-cryptenroll` which binds to PCR 7
 3. Mounts it at the designated path
 4. Sets up automatic unlock and mount either with Secret Registration Client service or /etc/crypttab with `systemd-cryptenroll`
-
-## Variables
-
-### trustee_client_secure_logging
-
-If `true`, suppress potentially sensitive output from tasks that handle
-credentials, secrets, and other sensitive data by setting `no_log: true` on
-those tasks. This prevents passwords, API tokens, private keys, and similar
-sensitive information from appearing in Ansible logs and console output.
-
-If you need to debug issues with credential handling or secret management, you
-can temporarily set `trustee_client_secure_logging: false` to see the full output from
-these tasks. However, be aware that this may expose sensitive information in
-logs, so it should only be used in development or troubleshooting scenarios.
-
-Default: `true`
 
 ## License
 
