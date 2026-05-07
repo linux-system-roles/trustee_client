@@ -17,3 +17,4 @@ trustee_client_secret_registration_enabled: false
 # Encrypt disk configuration
 trustee_client_encrypt_disk: false
 trustee_client_encrypt_disk_mount_point: "/mnt/encrypted-disk"
+trustee_client_secure_logging: true
