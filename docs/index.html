@@ -144,6 +144,11 @@ Client</a></li>
 <li><a href="#secret-registration-client"
 id="toc-secret-registration-client">Secret Registration Client</a></li>
 <li><a href="#encrypt-disk" id="toc-encrypt-disk">Encrypt Disk</a></li>
+<li><a href="#variables" id="toc-variables">Variables</a>
+<ul>
+<li><a href="#trustee_client_secure_logging"
+id="toc-trustee_client_secure_logging">trustee_client_secure_logging</a></li>
+</ul></li>
 <li><a href="#license" id="toc-license">License</a></li>
 <li><a href="#author-information" id="toc-author-information">Author
 Information</a></li>
@@ -220,6 +225,21 @@ using Secret Registration Client (when enabled), or b.
 Client service or /etc/crypttab with
 <code>systemd-cryptenroll</code></li>
 </ol>
+<h1 id="variables">Variables</h1>
+<h2
+id="trustee_client_secure_logging">trustee_client_secure_logging</h2>
+<p>If <code>true</code>, suppress potentially sensitive output from
+tasks that handle credentials, secrets, and other sensitive data by
+setting <code>no_log: true</code> on those tasks. This prevents
+passwords, API tokens, private keys, and similar sensitive information
+from appearing in Ansible logs and console output.</p>
+<p>If you need to debug issues with credential handling or secret
+management, you can temporarily set
+<code>trustee_client_secure_logging: false</code> to see the full output
+from these tasks. However, be aware that this may expose sensitive
+information in logs, so it should only be used in development or
+troubleshooting scenarios.</p>
+<p>Default: <code>true</code></p>
 <h1 id="license">License</h1>
 <p>Whenever possible, please prefer MIT.</p>
 <h1 id="author-information">Author Information</h1>
