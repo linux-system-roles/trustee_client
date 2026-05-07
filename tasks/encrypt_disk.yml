@@ -44,7 +44,7 @@
         /usr/local/bin/secret_registration_client.sh --fetch-key-to {{ __trustee_client_secret_key_tempfile.path }}
       changed_when: true
       when: trustee_client_secret_registration_enabled | bool
-      no_log: true
+      no_log: "{{ trustee_client_secure_logging }}"
 
     - name: Check systemd-cryptenroll command exists
       ansible.builtin.command: command -v systemd-cryptenroll
@@ -60,7 +60,7 @@
       when:
         - __trustee_client_cryptenroll_check is success
         - not trustee_client_secret_registration_enabled | bool
-      no_log: true
+      no_log: "{{ trustee_client_secure_logging }}"
 
     - name: Encrypt the partition
       ansible.builtin.shell: |
@@ -73,7 +73,7 @@
         [ -d {{ trustee_client_encrypt_disk_mount_point }} ] || mkdir -p {{ trustee_client_encrypt_disk_mount_point }}
         mount /dev/mapper/trustee_client_encrypted_disk_0 {{ trustee_client_encrypt_disk_mount_point }}
       changed_when: true
-      no_log: true
+      no_log: "{{ trustee_client_secure_logging }}"
 
     - name: TPM2 cryptenroll and configure crypttab/fstab
       when:
@@ -85,7 +85,7 @@
             systemd-cryptenroll {{ __trustee_client_disk_partition }} --tpm2-device=auto --tpm2-pcrs=7 --unlock-key-file={{ __trustee_client_secret_key_tempfile.path }}
             systemd-cryptenroll {{ __trustee_client_disk_partition }} --wipe-slot=password
           changed_when: true
-          no_log: true
+          no_log: "{{ trustee_client_secure_logging }}"
 
         - name: Get UUID of the LUKS partition
           ansible.builtin.command: "lsblk -dno UUID {{ __trustee_client_disk_partition }}"
