@@ -5,6 +5,13 @@
 # that outcome.
 - name: Verify invalid parameters are rejected
   hosts: all
+  vars:
+    __invalid_input_failure_messages: >-
+      {{ ([ansible_failed_result.msg | default('') | string,
+           ansible_failed_result.msg.msg | default('') | string]
+          + (ansible_failed_result.results | default([])
+             | map(attribute='msg') | map('default', '') | list))
+         | join(' ') }}
   tasks:
     - name: Run invalid input tests
       block:
@@ -33,6 +40,10 @@
                 - name: Mark invalid trustee_client_trustee_gc type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_trustee_gc_type_failed: true
+                  when: >-
+                    "argument 'trustee_client_trustee_gc'" in
+                    __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid trustee_client_trustee_gc type was rejected
               ansible.builtin.assert:
@@ -55,6 +66,10 @@
                 - name: Mark invalid secret_registration_enabled type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_secret_reg_enabled_type_failed: true
+                  when: >-
+                    "argument 'trustee_client_secret_registration_enabled'"
+                    in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid secret_registration_enabled type was rejected
               ansible.builtin.assert:
@@ -79,6 +94,10 @@
                 - name: Mark invalid trustee_client_encrypt_disk type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_encrypt_disk_type_failed: true
+                  when: >-
+                    "argument 'trustee_client_encrypt_disk'" in
+                    __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid trustee_client_encrypt_disk type was rejected
               ansible.builtin.assert:
@@ -103,6 +122,10 @@
                 - name: Mark invalid secure_logging type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_secure_logging_type_failed: true
+                  when: >-
+                    "argument 'trustee_client_secure_logging'" in
+                    __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid secure_logging type was rejected
               ansible.builtin.assert:
@@ -131,6 +154,9 @@
             - name: Mark invalid trustee_client_kbs_url type rejected
               ansible.builtin.set_fact:
                 __invalid_input_kbs_url_type_failed: true
+              when: >-
+                'trustee_client_kbs_url must be a string, got int'
+                in __invalid_input_failure_messages
 
         - name: Assert role-level kbs_url string validation was enforced
           ansible.builtin.assert:
@@ -152,6 +178,9 @@
             - name: Mark invalid kbs_cert_content type rejected
               ansible.builtin.set_fact:
                 __invalid_input_kbs_cert_content_type_failed: true
+              when: >-
+                'trustee_client_kbs_cert_content must be a string, got int'
+                in __invalid_input_failure_messages
 
         - name: Assert role-level kbs_cert_content string validation was enforced
           ansible.builtin.assert:
@@ -176,6 +205,9 @@
             - name: Mark invalid kbs_cert_src type rejected
               ansible.builtin.set_fact:
                 __invalid_input_kbs_cert_src_type_failed: true
+              when: >-
+                'trustee_client_kbs_cert_src must be a string, got int'
+                in __invalid_input_failure_messages
 
         - name: Assert role-level kbs_cert_src string validation was enforced
           ansible.builtin.assert:
@@ -200,6 +232,11 @@
             - name: Mark secret_registration without trustee_gc rejected
               ansible.builtin.set_fact:
                 __invalid_input_secret_reg_requires_trustee_gc_failed: true
+              when: >-
+                'trustee_client_secret_registration_enabled requires'
+                in __invalid_input_failure_messages and
+                'trustee_client_trustee_gc to be true'
+                in __invalid_input_failure_messages
 
         - name: Assert secret_registration without trustee_gc was rejected
           ansible.builtin.assert:
