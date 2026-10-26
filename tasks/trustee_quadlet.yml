@@ -5,6 +5,14 @@
     state: present
     use: "{{ (__trustee_client_is_ostree | d(false)) |
           ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
+  register: __trustee_client_trustee_gc_package_result
+
+- name: Handle reboot for transactional update systems
+  ansible.builtin.include_tasks: transactional_reboot.yml
+  vars:
+    __trustee_client_tu_result: "{{ __trustee_client_trustee_gc_package_result }}"
+    __trustee_client_tu_packages: "{{ __trustee_client_trustee_gc_packages }}"
+  when: __trustee_client_is_transactional
 
 - name: Ensure quadlet install directory exists
   ansible.builtin.file:
@@ -17,6 +25,7 @@
     src: files/quadlet/
     dest: "{{ __trustee_client_quadlet_install_dir }}/"
     mode: "0644"
+  register: __trustee_client_quadlet_files
 
 - name: Copy Trustee Guest aa Components config files to /etc/trustee-gc/
   ansible.builtin.copy:
@@ -24,6 +33,7 @@
     dest: /etc/trustee-gc/
     directory_mode: "0755"
     mode: "0644"
+  register: __trustee_client_aa_config
 
 - name: Copy Trustee Guest cdh Components config files to /etc/trustee-gc/
   ansible.builtin.copy:
@@ -31,6 +41,7 @@
     dest: /etc/trustee-gc/
     directory_mode: "0755"
     mode: "0644"
+  register: __trustee_client_cdh_config
 
 - name: Set KBS cert content from path or explicit content
   ansible.builtin.set_fact:
@@ -47,6 +58,7 @@
   loop:
     - /etc/trustee-gc/cdh/config.toml
     - /etc/trustee-gc/aa/config.toml
+  register: __trustee_client_kbs_url_config
   when: trustee_client_kbs_url | length > 0
 
 - name: Replace KBS_CERT in config.toml files
@@ -57,6 +69,7 @@
   loop:
     - /etc/trustee-gc/cdh/config.toml
     - /etc/trustee-gc/aa/config.toml
+  register: __trustee_client_kbs_cert_config
   when: __trustee_client_kbs_cert_content | length > 0
 
 - name: Write KBS certificate to /etc/trustee-gc/server.crt
@@ -76,6 +89,7 @@
     path: "{{ __trustee_client_quadlet_install_dir }}/trustee-gc-aa.container"
     regexp: '^#AddDevice=/dev/sev-guest'
     replace: 'AddDevice=/dev/sev-guest'
+  register: __trustee_client_sev_guest_unit
   when: __sev_guest_device.stat.exists
 
 - name: Get the installed Trustee Guest Components pod name
@@ -88,7 +102,15 @@
   ansible.builtin.systemd:
     name: "{{ trustee_gc_pod_name.files[0].path | basename | regex_replace('\\.pod$', '') }}-pod.service"
     enabled: true
-    state: restarted
+    state: "{{ 'restarted'
+      if __trustee_client_quadlet_files is changed
+      or __trustee_client_aa_config is changed
+      or __trustee_client_cdh_config is changed
+      or __trustee_client_kbs_url_config is changed
+      or __trustee_client_kbs_cert_config is changed
+      or __trustee_client_sev_guest_unit is changed
+      else 'started' }}"
     daemon_reload: true
+  register: __trustee_client_pod_service
   when: trustee_gc_pod_name.files | length > 0
   failed_when: false

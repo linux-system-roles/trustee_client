@@ -1,5 +1,21 @@
 # SPDX-License-Identifier: MIT
 ---
+# Install before picking the disk: a transactional-update reboot can rename it.
+- name: Ensure packages for disk encryption are installed
+  ansible.builtin.package:
+    name: "{{ __trustee_client_encrypt_disk_packages }}"
+    state: present
+    use: "{{ (__trustee_client_is_ostree | d(false)) |
+          ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
+  register: __trustee_client_encrypt_disk_package_result
+
+- name: Handle reboot for transactional update systems
+  ansible.builtin.include_tasks: transactional_reboot.yml
+  vars:
+    __trustee_client_tu_result: "{{ __trustee_client_encrypt_disk_package_result }}"
+    __trustee_client_tu_packages: "{{ __trustee_client_encrypt_disk_packages }}"
+  when: __trustee_client_is_transactional
+
 - name: Find the first unpartitioned disk
   ansible.builtin.shell: |
     set -o pipefail
@@ -26,13 +42,6 @@
     __trustee_client_disk_partition: >-
       /dev/{{ __trustee_client_unpartitioned_disk.stdout }}{{ 'p' if 'nvme' in __trustee_client_unpartitioned_disk.stdout else '' }}1
   block:
-    - name: Ensure packages for disk encryption are installed
-      ansible.builtin.package:
-        name: "{{ __trustee_client_encrypt_disk_packages }}"
-        state: present
-        use: "{{ (__trustee_client_is_ostree | d(false)) |
-              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
-
     - name: Create temporary file for disk encryption key
       ansible.builtin.tempfile:
         state: file
@@ -47,7 +56,7 @@
       no_log: "{{ trustee_client_secure_logging }}"
 
     - name: Check systemd-cryptenroll command exists
-      ansible.builtin.command: command -v systemd-cryptenroll
+      ansible.builtin.command: systemd-cryptenroll --version
       register: __trustee_client_cryptenroll_check
       changed_when: false
       when: not trustee_client_secret_registration_enabled | bool

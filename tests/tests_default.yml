@@ -147,6 +147,23 @@
             name: "{{ __test_trustee_pod_service }}"
             state: started
           check_mode: true
+
+        - name: Run the role again to check idempotency
+          ansible.builtin.include_tasks:
+            file: tasks/run_role_with_clear_facts.yml
+          vars:
+            __sr_public: true
+
+        # Not where /dev/sev-guest exists: the role still restarts the pod there
+        - name: Assert the second run did not restart the pod
+          ansible.builtin.assert:
+            that:
+              - __trustee_client_pod_service is not changed
+              - __trustee_client_pod_service.status.ActiveState == 'active'
+            fail_msg: >-
+              The second run of the role changed the Trustee Guest
+              Components files, or had to start or restart the pod
+          when: not __sev_guest_device.stat.exists
       always:
         - name: Cleanup trustee_client test resources
           ansible.builtin.include_tasks:

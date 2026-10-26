@@ -18,3 +18,6 @@ trustee_client_secret_registration_enabled: false
 trustee_client_encrypt_disk: false
 trustee_client_encrypt_disk_mount_point: "/mnt/encrypted-disk"
 trustee_client_secure_logging: true
+
+# Transactional update reboot: true reboots, false only notifies, null fails
+trustee_client_transactional_update_reboot_ok: null

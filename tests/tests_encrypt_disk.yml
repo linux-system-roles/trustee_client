@@ -186,7 +186,7 @@
             __test_skip_cryptenroll_assertions: "{{ __test_unpartitioned_disk.stdout | trim == '' }}"
 
         - name: Check systemd-cryptenroll exists
-          ansible.builtin.command: command -v systemd-cryptenroll
+          ansible.builtin.command: systemd-cryptenroll --version
           register: __test_cryptenroll_check
           changed_when: false
           failed_when: false
