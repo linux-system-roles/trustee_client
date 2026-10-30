@@ -35,3 +35,14 @@
       trustee_client_secret_registration_enabled requires
       trustee_client_trustee_gc to be true
   when: trustee_client_secret_registration_enabled | bool
+
+- name: Assert trustee_client_transactional_update_reboot_ok is null or a boolean
+  ansible.builtin.assert:
+    that:
+      - >-
+        (trustee_client_transactional_update_reboot_ok is none)
+        or (trustee_client_transactional_update_reboot_ok is sameas true)
+        or (trustee_client_transactional_update_reboot_ok is sameas false)
+    fail_msg: >-
+      trustee_client_transactional_update_reboot_ok must be null or a boolean,
+      got {{ trustee_client_transactional_update_reboot_ok | type_debug }}

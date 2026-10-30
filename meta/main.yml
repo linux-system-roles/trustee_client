@@ -19,6 +19,9 @@ galaxy_info:
     - el9
     - el10
     - fedora
+    - leap16
+    - sles
+    - sles16
     # Support running this role in system container environments, and enable
     # tests. Remove if not applicable.
     # - container

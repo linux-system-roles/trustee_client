@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: MIT
+# Assisted by Claude Code using model(s) Claude Fable 5.1, Claude Opus 5.5
+---
+# Put internal variables here with SUSE specific values.
+
+# systemd-cryptenroll needs the TPM2 TSS libraries, which SUSE only recommends
+__trustee_client_encrypt_disk_packages:
+  - cryptsetup
+  - parted
+  - libtss2-esys0
+  - libtss2-mu0
+  - libtss2-rc0
+  - libtss2-tcti-device0
